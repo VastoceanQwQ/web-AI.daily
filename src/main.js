@@ -14,8 +14,5 @@ app.use(ElementPlus)
 app.mount('#app')
 
 
-import MainFooter from './components/footer.vue'
-app.component('main-footer', MainFooter)
-
 
 

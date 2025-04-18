@@ -1,4 +1,5 @@
 <template>
+    <main-footer></main-footer>
     <div class="main-place">
         <div class="card-container">
             <div v-for="(card, index) in cards" :key="index" class="card">
@@ -7,12 +8,11 @@
             </div>
         </div>
     </div>
-    <main-footer></main-footer>
 </template>
 
 <script>
 import MarkdownIt from 'markdown-it';
-
+import MainFooter from './components/footer.vue'
 const md = new MarkdownIt();
 
 export default {
@@ -42,6 +42,10 @@ export default {
             ],
         };
     },
+    components: {
+        MainFooter,
+    },
+    
     methods: {
         renderMarkdown(content) {
             return md.render(content);
