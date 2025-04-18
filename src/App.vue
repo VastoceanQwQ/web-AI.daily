@@ -1,7 +1,7 @@
 <template>
     <main-footer></main-footer>
     <div class="main-place">
-        <div class="card-description">开发版界面 · Ver 20250419-001</div>
+        <div class="card-description">开发版界面 · Ver 20250419-001 · 1:30AM</div>
         <div class="card-container">
             <div v-for="(card, index) in cards" :key="index" class="card">
                 <div class="card-header" :style="{ backgroundImage: `url(${card.headerImage})` }"></div>
