@@ -1,0 +1,25 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "element-plus": "^2.9.7",
+    "markdown-it": "^14.1.0",
+    "marked": "^15.0.8",
+    "vue": "^3.5.13",
+    "vue-grid-layout": "^2.4.0",
+    "vue-markdown-it": "^0.9.4",
+    "vue-markdown-renderer": "^0.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite": "^6.2.4",
+    "vite-plugin-vue-devtools": "^7.7.2"
+  }
+}
