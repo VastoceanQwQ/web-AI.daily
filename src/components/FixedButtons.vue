@@ -122,7 +122,7 @@ export default {
     width: 50px;
     height: 50px;
     border-radius: 12px;
-    background-image: linear-gradient(0deg, #eed6da 0%, #cedef6 99%, #d8e7fd 100%);
+    background-image: linear-gradient(0deg, #eedde0 0%, #d7e6fc 95%, #d3e2f8 100%);
     color: rgb(0, 0, 0);
     border: 2px solid #ffffff;
     /* 添加外边框 */
@@ -131,7 +131,7 @@ export default {
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.20);
     break-inside: avoid;
     margin-bottom: 20px;
     opacity: 1;
@@ -150,7 +150,7 @@ export default {
 }
 
 .button:hover {
-    background-image: linear-gradient(0deg, #eec9cf 0%, #bad4fb 99%, #a2c6fa 100%);
+    background-image: linear-gradient(0deg, #f4d5da 0%, #c3d8f7 99%, #b6d2f8 100%);
     border-color: #0199ff;
     /* 改变hover状态下的边框颜色 */
 }
