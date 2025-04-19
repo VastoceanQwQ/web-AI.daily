@@ -9,21 +9,15 @@
       <span class="text_2">编辑模块</span>
     </div>
     <div class="flex-row items-center pos_8" id="footer-right">
-      <img
-        class="image_4"
+      <img class="image_4"
         src="https://ide.code.fun/api/image?token=6801b58c4ae84d00122d6e36&name=b9f875e28fc4109de403e9051be74f89.png"
-        id="footer-downline-icon"
-      />
-      <img
-        class="ml-30 image_5"
+        id="footer-downline-icon" />
+      <img class="ml-30 image_5"
         src="https://ide.code.fun/api/image?token=6801b58c4ae84d00122d6e36&name=776e058c68516c5d43cf8005ad87a918.png"
-        id="footer-history-icon"
-      />
-      <img
-        class="ml-30 image_3"
+        id="footer-history-icon" />
+      <img class="ml-30 image_3"
         src="https://ide.code.fun/api/image?token=6801b58c4ae84d00122d6e36&name=5250b1f98977f402158c028d1795c517.png"
-        id="footer-setting-icon"
-      />
+        id="footer-setting-icon" />
       <div class="ml-30 section_8" id="footer-profile"></div>
     </div>
   </div>
@@ -41,10 +35,15 @@ export default {};
   width: 100%;
   height: 50px;
   opacity: 1;
-  background: rgba(255, 255, 255, 0.6); /* 半透明背景 */
+  background: rgba(255, 255, 255, 0.6);
+  /* 半透明背景 */
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(7.5px); /* 毛玻璃效果 */
-  z-index: 10; /* 确保 footer 在页面最上层 */
+  backdrop-filter: blur(7.5px);
+  /* 毛玻璃效果 */
+  z-index: 10;
+  /* 确保 footer 在页面最上层 */
+
+  user-select: none;
 }
 
 /* logo */
@@ -88,16 +87,19 @@ export default {};
 .image_4 {
   width: 0.75rem;
   height: 0.75rem;
+  position: relative;
 }
 
 .image_5 {
   width: 0.81rem;
   height: 0.81rem;
+  position: relative;
 }
 
 .image_3 {
   width: 0.88rem;
   height: 0.94rem;
+  position: relative;
 }
 
 .section_8 {
@@ -105,6 +107,30 @@ export default {};
   border-radius: 50%;
   width: 2.2rem;
   height: 2.22rem;
+}
+
+/* 添加伪元素 */
+.image_4::before,
+.image_5::before,
+.image_3::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.image_4:hover::before,
+.image_5:hover::before,
+.image_3:hover::before {
+  opacity: 1;
 }
 
 /* 编辑模块 */
@@ -120,10 +146,16 @@ export default {};
   border-radius: 0.75rem;
   width: 8.88rem;
   height: 1.94rem;
-  border-left: solid 0.063rem #ffffff;
-  border-right: solid 0.063rem #ffffff;
-  border-top: solid 0.063rem #ffffff;
-  border-bottom: solid 0.063rem #ffffff;
+  border-left: solid 2px #ffffff;
+  border-right: solid 2px #ffffff;
+  border-top: solid 2px #ffffff;
+  border-bottom: solid 2px #ffffff;
+}
+
+.text-wrapper:hover {
+  background-image: linear-gradient(0deg, #f1dcdf 0%, #d0e0f9 99%, #c5dbf9 100%);
+  border-color: #0099ff;
+  /* 改变hover状态下的边框颜色 */
 }
 
 .text_2 {

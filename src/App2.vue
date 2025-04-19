@@ -14,7 +14,7 @@
 
 <script>
 import MarkdownIt from 'markdown-it';
-import MainFooter from './components/footer.vue'
+import MainFooter from './components/Footer.vue'
 const md = new MarkdownIt();
 
 export default {
@@ -104,7 +104,7 @@ export default {
 
             ],
         };
-        
+
     },
     components: {
         MainFooter,
