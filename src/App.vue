@@ -1,7 +1,7 @@
 <template>
     <main-footer></main-footer>
     <div class="main-place" ref="mainPlace">
-        <div class="card-description">开发版界面 · Ver 20250420-001 · 01:45
+        <div class="card-description">开发版界面 · Ver 20250420-002 · 14:15
             <div v-if="cards.length > 0">
                 <button @click="clearCards" class="test-button">删除所有卡片</button>
             </div>
@@ -12,19 +12,17 @@
                 <p>您还没有添加卡片哦</p>
                 <p>请点击下方“编辑模块”按钮添加卡片,开启您的AI早报之旅</p>
             </div>
-
         </div>
         <div v-else>
-            <div class="card-container">
+            <transition-group name="card-list" tag="div" class="card-container">
                 <div v-for="(card, index) in cards" :key="index" class="card"
                     :class="{ 'has-header-image': card.headerImage }">
                     <div class="card-header" :style="{ backgroundImage: `url(${card.headerImage || ''})` }"></div>
                     <div class="card-content" v-html="renderMarkdown(card.content)"></div>
                 </div>
+            </transition-group>
         </div>
         <div class="upper-main"></div>
-    </div>
-
     </div>
     <fixed-buttons v-if="cards.length > 0" :main-place-ref="mainPlace" :cards="cards" id="buttons"></fixed-buttons>
 </template>
@@ -62,10 +60,9 @@ export default {
             {
                 content: '# 📰 今日新闻热点及头条\n\n---\n\n#### 📈 **头条新闻**  \n1. **【综合新闻】每日热点15条新闻简报每天一分钟知晓天下事 4月18日**  \n   - 统计局公布3月不同年龄段劳动力失业率，较上月均有下降；三部门开展工伤保险跨省异地就医直接结算工作 。  \n   - 来源链接：[平邑融媒](https://toutiao.com/group/7494460029265920546/)  \n\n---\n\n#### 🔥 **热点新闻**  \n1. **【政策点评】【每日热点新闻政策点评】4月18日 星期五**  \n   - 学会从政策新闻中看门道，从金融角度看世界 。  \n   - 来源链接：[新生代作手阿基](https://toutiao.com/group/7494464245938029066/)  \n\n2. **【社会热点】纵览热点｜青岛电影学院大四女生失联已近一个月，其母：没有任何**  \n   - 23岁女大学生深夜赤脚离奇失踪，母亲苦寻30天发现手机被清空 。  \n   - 来源链接：[隔壁小王](https://toutiao.com/group/7494578161980572223/)  \n\n3. **【健康热点】万步走 10年助力公众减重112万公斤**  \n   - 第十届“万步有约”健走激励大赛正式启动，预计总参赛规模超100万人 。  \n   - 来源链接：[北青热点](https://t.ynet.cn/h5/36599852.html)  \n\n---\n\n#### 🔍 **深度追踪**  \n- **【综合新闻】每日热点15条新闻简报每天一分钟知晓天下事 4月16日**  \n  - 住建部聚焦城镇住宅工程质量问题开展整治；网信办开展整治短视频领域恶意营销乱象专项行动；电动汽车电池新国标将于2026年7月1日施行 。  \n  - 来源链接：[平邑融媒](https://toutiao.com/group/7493689120703676943/)  \n\n---\n  \n*注：新闻选取基于1744993391857.0前12小时热度数据，持续追踪请刷新页面。*  ',
             },
-
             {
                 headerImage: '',
-                content: '# Text Card\n>This is the content of card 4 in Markdown format. Here is a code block:\n',
+                content: '# Text Card\n> This is the content of card 4 in Markdown format. Here is a code block:\n',
             },
             {
                 headerImage: 'https://img.picui.cn/free/2025/04/20/6803d04b0afe1.jpg',
@@ -73,7 +70,7 @@ export default {
             },
             {
                 headerImage: '',
-                content: '*本站部分文本2由AI生成，请注意甄别。* \n\n *Powered by [AI-Daliy](https://ai-daliy.vastocean.work/).   Made by Vastocean & other 2 maker.*',
+                content: '*本站部分文本由AI生成，请注意甄别。* \n\n *Powered by [AI-Daily](https://ai-daily.vastocean.work/).   Made by Vastocean & other 2 maker.*',
             },]);
 
         // 定义方法
@@ -312,5 +309,16 @@ main-footer {
     color: #636363;
     opacity: 0.7;
     font-weight: bold;
+}
+
+/* 添加过渡效果的 CSS 类 */
+.card-list-enter-active,
+.card-list-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.card-list-enter-from,
+.card-list-leave-to {
+    opacity: 0;
 }
 </style>

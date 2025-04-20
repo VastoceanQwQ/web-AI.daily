@@ -44,8 +44,10 @@ export default {
 
         const scrollToCard = (index) => {
             const cardElements = document.querySelectorAll('.card');
-            if (cardElements.length > index) {
-                cardElements[index].scrollIntoView({ behavior: 'smooth' });
+            const filteredCardIndices = filteredCards.value.map(card => props.cards.indexOf(card));
+            const targetIndex = filteredCardIndices[index];
+            if (cardElements.length > targetIndex) {
+                cardElements[targetIndex].scrollIntoView({ behavior: 'smooth' });
                 showMenu.value = false;
             }
         };
@@ -157,11 +159,11 @@ export default {
 
 .dropdown-menu {
     position: absolute;
-    width: 55px;
+    width:58px;
     /* 与按钮宽度相同 */
     bottom: 80px;
     /* 调整为在按钮上方 */
-    left: -3px;
+    left: -5px;
     /* 与按钮对齐 */
     background-color: rgba(255, 255, 255, 0.6);
     /* 白色背景 */
@@ -169,7 +171,7 @@ export default {
     /* 无边框 */
     box-shadow: none;
     /* 无阴影 */
-    max-height: 200px;
+    max-height: 300px;
     /* 设置最大高度 */
     overflow-y: auto;
     /* 允许滚动 */
