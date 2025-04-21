@@ -1,11 +1,11 @@
-<!-- src/components/FixedButtons.vue -->
 <template>
     <div class="fixed-buttons" :style="fixedButtonsStyle">
         <transition name="fade">
             <button v-show="showScrollToTopButton" class="button" @click="scrollToTop"><img src="/to-top.svg"
                     alt="To-top Icon" class="icon" /></button>
         </transition>
-        <button class="button" @click="toggleMenu">
+        <!-- 条件判断：只有当 filteredCards 不为空时才显示定位卡片按钮 -->
+        <button v-if="filteredCards.length > 0" class="button" @click="toggleMenu">
             <img src="/map.svg" alt="Map Icon" class="icon" />
         </button>
         <transition name="fade">
@@ -159,7 +159,7 @@ export default {
 
 .dropdown-menu {
     position: absolute;
-    width:58px;
+    width: 58px;
     /* 与按钮宽度相同 */
     bottom: 80px;
     /* 调整为在按钮上方 */

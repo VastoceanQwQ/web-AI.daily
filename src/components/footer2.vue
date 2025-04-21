@@ -6,7 +6,7 @@
       <span class="text ml-31">AI早报</span>
     </div>
     <div class="flex-col justify-start items-center text-wrapper" id="footer-edit-button">
-      <span class="text_2">编辑模块</span>
+      <span class="text_2">编辑卡片</span>
     </div>
     <div class="flex-row items-center pos_8" id="footer-right">
       <img class="image_4"
