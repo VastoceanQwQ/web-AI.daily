@@ -1,4 +1,6 @@
+<!-- src/App.vue -->
 <template>
+    <router-view></router-view>
     <main-footer></main-footer>
     <div class="main-place" ref="mainPlace">
         <div class="card-description">开发版界面 · Ver 20250421-001 · 20:45
@@ -32,8 +34,8 @@
 <script>
 import { ref, onMounted } from 'vue';
 import MarkdownIt from 'markdown-it';
-import MainFooter from './components/Sidebar.vue';
-import FixedButtons from './components/FixedButtons.vue';
+import MainFooter from './components/Sidebar.vue'; // 确保路径正确
+import FixedButtons from './components/FixedButtons.vue'; // 确保路径正确
 import scrollReveal from 'scrollreveal';
 import { sampleCards } from './sampleCards'; // 导入示例数据
 
@@ -116,7 +118,6 @@ export default {
             retScroll();
             // 同步新的 .card 元素
             scrollReveal().sync();
-
         };
 
         return {
@@ -267,6 +268,7 @@ main-footer {
     background-clip: text;
     color: transparent;
     text-decoration: none;
+    transition: color 0.2s;
 }
 
 .card-content a:hover {

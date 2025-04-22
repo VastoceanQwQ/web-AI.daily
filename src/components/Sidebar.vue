@@ -1,6 +1,14 @@
+<!-- src/components/Sidebar.vue -->
 <template>
     <div class="sidebar" :class="{ 'hidden': isHidden }">
-        <div class="profile" id="footer-profile"></div>
+        <router-link to="/login">
+            <div id="footer-profile" class="profile">
+                <div class="profile-image"></div>
+                <div class="profile-name">
+                    {{ isLoggedIn ? username : '登录' }}
+                </div>
+            </div>
+        </router-link>
         <div class="sidebar-items">
             <div class="sidebar-item" @click="handleClick('edit')">
                 <img src="/edit.svg" alt="Edit Icon" class="icon" />
@@ -26,33 +34,35 @@
         <div class="footer-logo" id="footer-logo">
             <div class="shrink-0 section_9"></div>
         </div>
-
     </div>
 </template>
 
 <script>
+import { useRouter } from 'vue-router';
+
 export default {
     data() {
         return {
             isHidden: false,
+            isLoggedIn: false, // 假设初始状态为未登录
+            username: '', // 用户名，初始为空
         };
     },
     methods: {
         handleClick(action) {
-            // 处理点击事件
             console.log(`Clicked on ${action}`);
         },
         toggleSidebar() {
             this.isHidden = !this.isHidden;
         },
         handleMouseEnter(event) {
-            if (event.clientX < 5) { // 50px 是侧栏的宽度
+            if (event.clientX < 5) {
                 this.isHidden = false;
             }
         },
         handleMouseLeave() {
             this.isHidden = true;
-        }
+        },
     },
     mounted() {
         window.addEventListener('mousemove', this.handleMouseEnter);
@@ -76,7 +86,7 @@ export default {
     background: rgba(255, 255, 255, 0.6);
     box-shadow: 2px 0px 20px rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(7.5px);
-    z-index: 10;
+    z-index: 2000;
     user-select: none;
     display: flex;
     flex-direction: column;
@@ -86,15 +96,28 @@ export default {
 
 .sidebar.hidden {
     transform: translateX(-60px);
-    /* 侧边栏宽度 */
 }
 
 .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px auto;
+    cursor: pointer;
+}
+
+.profile-image {
     background-color: #e3e3e3;
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    margin: 20px auto;
+    margin-bottom: 5px;
+}
+
+.profile-name {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #6b6b6b;
 }
 
 .sidebar-items {
@@ -158,4 +181,5 @@ export default {
     line-height: 0.92rem;
     letter-spacing: 0.13rem;
 }
+
 </style>
