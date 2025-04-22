@@ -10,18 +10,22 @@
             </div>
         </router-link>
         <div class="sidebar-items">
-            <div class="sidebar-item" @click="handleClick('edit')">
+            <router-link to="/" class="sidebar-item">
+                <img src="/waterfalls.svg" alt="Home Icon" class="icon" />
+                <span class="text">主页</span>
+            </router-link>
+            <router-link to="/edit" class="sidebar-item">
                 <img src="/edit.svg" alt="Edit Icon" class="icon" />
                 <span class="text">编辑</span>
-            </div>
-            <div class="sidebar-item" @click="handleClick('history')">
+            </router-link>
+            <router-link to="/history" class="sidebar-item">
                 <img src="/history.svg" alt="History Icon" class="icon" />
                 <span class="text">历史</span>
-            </div>
-            <div class="sidebar-item" @click="handleClick('settings')">
+            </router-link>
+            <router-link to="/settings" class="sidebar-item">
                 <img src="/setting.svg" alt="Setting Icon" class="icon" />
                 <span class="text">设置</span>
-            </div>
+            </router-link>
             <div class="sidebar-item" @click="toggleSidebar" v-if="!isHidden">
                 <img src="/left.svg" alt="Left Icon" class="icon" />
                 <span class="text"></span>
@@ -38,8 +42,6 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-
 export default {
     data() {
         return {
@@ -49,9 +51,6 @@ export default {
         };
     },
     methods: {
-        handleClick(action) {
-            console.log(`Clicked on ${action}`);
-        },
         toggleSidebar() {
             this.isHidden = !this.isHidden;
         },
@@ -181,5 +180,4 @@ export default {
     line-height: 0.92rem;
     letter-spacing: 0.13rem;
 }
-
 </style>

@@ -1,4 +1,4 @@
-<!-- Login.vue -->
+<!-- src/components/Login.vue -->
 <template>
     <div class="login" ref="loginCard">
         <div class="image">
@@ -34,7 +34,6 @@ export default {
     },
     mounted() {
         this.initScrollReveal();
-        this.$emit('showMainPlace', false); // 通知 App.vue 隐藏 main-place
     },
     methods: {
         handleLogin() {
@@ -82,7 +81,8 @@ export default {
 }
 
 .login .image {
-    flex: 0.65;
+    flex: 0.65; /* 图片占65% */
+    background-color: #000;
     border-radius: 12px 0 0 12px;
     overflow: hidden;
     position: relative;
@@ -107,13 +107,13 @@ export default {
 }
 
 .login .loginform {
-    flex: 0.35;
+    flex: 0.35; /* 表单占35% */
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0); /* 调整背景颜色 */
+    background-color: rgba(255, 255, 255, 0);
     border-radius: 0 12px 12px 0;
 }
 

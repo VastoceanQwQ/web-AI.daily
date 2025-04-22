@@ -1,4 +1,3 @@
-<!-- Register.vue -->
 <template>
     <div class="login" ref="registerCard">
         <div class="image">
@@ -9,45 +8,137 @@
             <form @submit.prevent="handleRegister">
                 <div class="form-group">
                     <label for="username">用户名</label>
-                    <input type="text" id="username" v-model="username" required />
+                    <input type="text" id="username" v-model="user_name" required placeholder="3-15字 汉字字母数字下划线"
+                        :class="{ 'is-invalid': errors.user_name, 'is-valid': !errors.user_name && user_name && isSubmitted }"
+                        @blur="resetValidation('user_name')" />
                 </div>
                 <div class="form-group">
                     <label for="password">密码</label>
-                    <input type="password" id="password" v-model="password" required />
+                    <input type="password" id="password" v-model="user_password" required placeholder="6-20位 必须含有字母与数字"
+                        :class="{ 'is-invalid': errors.user_password, 'is-valid': !errors.user_password && user_password && isSubmitted }"
+                        @blur="resetValidation('user_password')" />
                 </div>
                 <div class="form-group">
                     <label for="password-again">再次输入密码</label>
-                    <input type="password" id="password-again" v-model="passwordAgain" required />
+                    <input type="password" id="password-again" v-model="passwordAgain" required placeholder="两次需一致"
+                        :class="{ 'is-invalid': errors.passwordAgain, 'is-valid': !errors.passwordAgain && passwordAgain && isSubmitted }"
+                        @blur="resetValidation('passwordAgain')" />
                 </div>
                 <button type="submit" class="btn">注册</button>
+                <p class="msg">已有账号？<router-link to="/login">登录</router-link></p>
             </form>
         </div>
+        <Alert ref="alertComponent" />
     </div>
 </template>
 
 <script>
 import scrollReveal from 'scrollreveal';
+import Alert from './Alert.vue';
+import { CozeAPI } from '@coze/api';
 
 export default {
+    components: {
+        Alert,
+    },
     data() {
         return {
-            username: '',
-            email: '',
-            password: '',
-            passwordAgain: '', // 添加再次输入密码的字段
+            user_name: '',
+            user_password: '',
+            passwordAgain: '',
+            code: 0,
+            errors: {},
+            isSubmitted: false, // 新增一个标志位，表示是否已提交
+            api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
         };
     },
     mounted() {
         this.initScrollReveal();
-        this.$emit('showMainPlace', false); // 通知 App.vue 隐藏 main-place
     },
     methods: {
-        handleRegister() {
-            // 处理注册逻辑
-            console.log('Username:', this.username);
-            console.log('Email:', this.email);
-            console.log('Password:', this.password);
-            console.log('Password Again:', this.passwordAgain);
+        async handleRegister() {
+            this.errors = {};
+            this.isSubmitted = true; // 设置为已提交
+            let isValid = true;
+            let errorMessages = [];
+
+            // 验证用户名
+            const usernameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5_]{3,15}$/;
+            if (!usernameRegex.test(this.user_name)) {
+                errorMessages.push('用户名3-15字，只能包含大小写字母、汉字、数字和下划线');
+                this.errors.user_name = true;
+                isValid = false;
+            } else {
+                this.errors.user_name = false;
+            }
+
+            // 验证密码
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_]{6,20}$/;
+            if (!passwordRegex.test(this.user_password)) {
+                errorMessages.push('密码6-20位，必须含有字母与数字，只能包含大小写字母、数字和下划线');
+                this.errors.user_password = true;
+                isValid = false;
+            } else {
+                this.errors.user_password = false;
+            }
+
+            // 验证两次密码是否一致
+            if (this.user_password !== this.passwordAgain) {
+                errorMessages.push('两次输入的密码不一致');
+                this.errors.passwordAgain = true;
+                isValid = false;
+            } else {
+                this.errors.passwordAgain = false;
+            }
+
+            if (isValid) {
+                console.log('Validation passed'); // 确认是否进入这一块
+                // 处理注册逻辑
+                console.log('Username:', this.user_name);
+                console.log('Password:', this.user_password);
+                console.log('0');
+
+                console.log('1');
+                try {
+                    const apiClient = new CozeAPI({
+                        token: this.api_token,
+                        baseURL: 'https://api.coze.cn'
+                    });
+                    console.log('2');
+                } catch (error) {
+                    console.error('CozeAPI 初始化失败:', error);
+                }
+
+                try {
+                    const res = await apiClient.workflows.runs.stream({
+                        workflow_id: '7495766150467895306',
+                        parameters: {
+                            "name": this.user_name,
+                            "password": this.user_password
+                        },
+                    });
+
+                    console.log('API Response:', res);
+                    this.code = 1;
+                    this.$refs.alertComponent.showAlert('注册成功', 'success');
+                } catch (error) {
+                    console.error('注册失败:', error);
+                    if (error.response) {
+                        console.error('API 错误响应:', error.response.data);
+                        console.error('API 错误状态码:', error.response.status);
+                        console.error('API 错误头:', error.response.headers);
+                    } else if (error.request) {
+                        console.error('API 请求对象:', error.request);
+                    } else {
+                        console.error('API 错误信息:', error.message);
+                    }
+                    this.$refs.alertComponent.showAlert('注册失败，请重试', 'error');
+                }
+            } else {
+                console.log('Validation failed'); // 确认是否进入这一块
+                const combinedErrors = errorMessages.join('\n');
+                this.$refs.alertComponent.showAlert(combinedErrors, 'error');
+            }
         },
         initScrollReveal() {
             const sr = scrollReveal();
@@ -55,7 +146,7 @@ export default {
                 duration: 500,
                 delay: 100,
                 origin: 'bottom',
-                reset: true, // 设置为true，以便在滚动回顶部时重新应用动画
+                reset: true,
                 mobile: true,
                 distance: '30px',
                 opacity: 0.001,
@@ -65,6 +156,11 @@ export default {
                     console.log('Register card revealed');
                 },
             });
+        },
+        resetValidation(fieldName) {
+            if (!this.isSubmitted) {
+                this.errors[fieldName] = false; // 重置错误状态
+            }
         },
     },
 };
@@ -89,7 +185,8 @@ export default {
 }
 
 .login .image {
-    flex: 0.65; /* 图片占65% */
+    flex: 0.65;
+    /* 图片占65% */
     background-color: #000;
     border-radius: 12px 0 0 12px;
     overflow: hidden;
@@ -99,7 +196,8 @@ export default {
 .login .image img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 使图片填充整个容器 */
+    object-fit: cover;
+    /* 使图片填充整个容器 */
 }
 
 .login .image::before {
@@ -115,7 +213,8 @@ export default {
 }
 
 .login .loginform {
-    flex: 0.35; /* 表单占35% */
+    flex: 0.35;
+    /* 表单占35% */
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -128,13 +227,13 @@ export default {
 .login .loginform h2 {
     font-weight: bold;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     font-size: 24px;
     color: #666;
 }
 
 .login .loginform .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     width: 100%;
 }
 
@@ -151,6 +250,37 @@ export default {
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #f9f9f9;
+    color: #333;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.login .loginform input::placeholder {
+    color: #999;
+    /* 提示文字颜色变灰 */
+    opacity: 1;
+    /* Firefox */
+}
+
+.login .loginform input:focus {
+    border-color: #007bff !important;
+    /* 选中时外框为蓝色 */
+    background-color: #fff !important;
+    /* 选中时底色为白色 */
+    outline: none;
+}
+
+.login .loginform input.is-invalid {
+    border-color: #dc3545;
+    /* 验证失败时外框为红色 */
+    background-color: #f8d7da;
+    /* 验证失败时底色为红色 */
+}
+
+.login .loginform input.is-valid {
+    border-color: #28a745;
+    /* 验证通过时外框为绿色 */
+    background-color: #d4edda;
+    /* 验证通过时底色为绿色 */
 }
 
 .login .loginform .btn {
@@ -167,13 +297,13 @@ export default {
 
 .login .loginform .btn:hover {
     background-image: linear-gradient(0deg, #f4d5dab4 0%, #c3d8f7b6 99%, #b6d2f8 100%);
-    border-color: #000000;
+    border-color: #007bff;
     transition: 0.2s;
 }
 
 .login .loginform .msg {
     text-align: center;
-    line-height: 88px;
+    line-height: 48px;
     font-size: 13px;
     color: #666;
 }
