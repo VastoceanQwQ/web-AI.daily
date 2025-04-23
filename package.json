@@ -9,17 +9,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@coze/api": "^1.2.0",
     "@iconify/vue": "^4.3.0",
+    "axios": "^1.8.4",
+    "crypto-js": "^4.2.0",
     "element-plus": "^2.9.7",
     "github-markdown-css": "^5.8.1",
     "markdown-it": "^14.1.0",
     "marked": "^15.0.8",
     "masonry-layout": "^4.2.2",
+    "mitt": "^3.0.1",
     "scrollreveal": "^4.0.9",
     "vue": "^3.5.13",
     "vue-grid-layout": "^2.4.0",
     "vue-markdown-it": "^0.9.4",
-    "vue-markdown-renderer": "^0.2.7"
+    "vue-markdown-renderer": "^0.2.7",
+    "vue-router": "^4.0.13"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
