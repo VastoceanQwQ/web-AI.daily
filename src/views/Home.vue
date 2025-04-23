@@ -45,12 +45,13 @@ export default {
     setup() {
         // 定义每种卡片类型的主题色
         const themeColors = {
-            date: '#d0ebff', 
-            weather: '#e9ecef', 
-            fortune: '#e5dbff', 
-            miku: '#c5f6fa', 
-            news: '#ffe3e3', 
-            text: '#ffe8cc', 
+            date: '#d0ebff',
+            weather: '#e9ecef',
+            fortune: '#e5dbff',
+            miku: '#c5f6fa',
+            news: '#fcc2d7',
+            text: '#ffe8cc',
+            newstop: '#ffc9c9',
         };
 
         // 定义响应式数据
