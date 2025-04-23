@@ -1,32 +1,42 @@
-<!-- src/components/Sidebar.vue -->
 <template>
-    <div class="sidebar" :class="{ 'hidden': isHidden }">
-        <router-link to="/login">
+    <div class="sidebar" :class="{ 'hidden': isHidden }" :key="componentKey">
+        <router-link to="/login" v-if="!isLoggedIn">
             <div id="footer-profile" class="profile">
                 <div class="profile-image"></div>
                 <div class="profile-name">
-                    {{ isLoggedIn ? username : '登录' }}
+                    登录
                 </div>
             </div>
         </router-link>
+        <div v-else>
+            <div id="footer-profile" class="profile">
+                <div class="profile-image"></div>
+                <div class="profile-name">
+                    {{ username }}
+                </div>
+            </div>
+        </div>
         <div class="sidebar-items">
             <router-link to="/" class="sidebar-item">
                 <img src="/waterfalls.svg" alt="Home Icon" class="icon" />
                 <span class="text">主页</span>
             </router-link>
-            <router-link to="/edit" class="sidebar-item">
+            <router-link to="/edit" class="sidebar-item" v-if="isLoggedIn">
                 <img src="/edit.svg" alt="Edit Icon" class="icon" />
                 <span class="text">编辑</span>
             </router-link>
-            <router-link to="/history" class="sidebar-item">
+            <router-link to="/history" class="sidebar-item" v-if="isLoggedIn">
                 <img src="/history.svg" alt="History Icon" class="icon" />
                 <span class="text">历史</span>
             </router-link>
-            <router-link to="/settings" class="sidebar-item">
+            <router-link to="/settings" class="sidebar-item" v-if="isLoggedIn">
                 <img src="/setting.svg" alt="Setting Icon" class="icon" />
                 <span class="text">设置</span>
             </router-link>
-            <div class="sidebar-item" @click="toggleSidebar" v-if="!isHidden">
+            <router-link to="/login" class="sidebar-item" v-if="isLoggedIn">
+                <span class="text" @click="handleLogout">注销</span>
+            </router-link>
+            <div class="sidebar-item" @click="hideSidebar" v-if="isHidden">
                 <img src="/left.svg" alt="Left Icon" class="icon" />
                 <span class="text"></span>
             </div>
@@ -36,40 +46,86 @@
             </div>
         </div>
         <div class="footer-logo" id="footer-logo">
-            <div class="shrink-0 section_9"></div>
+            <div class="logo"><img src="@/assets/img/logo.jpg" /></div>
+            <div class="logo-text">
+                
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+import { ref, onMounted, getCurrentInstance } from 'vue';
+
+import { getCookie, eraseCookie } from '@/utils/cookieUtils';
+import eventBus from '@/eventBus';
+
 export default {
-    data() {
-        return {
-            isHidden: false,
-            isLoggedIn: false, // 假设初始状态为未登录
-            username: '', // 用户名，初始为空
-        };
-    },
-    methods: {
-        toggleSidebar() {
-            this.isHidden = !this.isHidden;
-        },
-        handleMouseEnter(event) {
-            if (event.clientX < 5) {
-                this.isHidden = false;
+    name: 'Sidebar',
+    setup() {
+        const isHidden = ref(false); // 默认显示侧边栏
+        const isLoggedIn = ref(false);
+        const username = ref('');
+        const componentKey = ref(0); // 添加 key 属性
+        const instance = getCurrentInstance();
+        // 使用instance.ctx或instance.proxy来访问组件实例
+        // 推荐使用proxy，因为它是响应式的
+        const { ctx: that, proxy } = instance;
+
+        // 初始化时检查登录状态
+        onMounted(() => {
+            const storedUsername = getCookie('username');
+            if (storedUsername) {
+                isLoggedIn.value = true;
+                username.value = storedUsername;
             }
-        },
-        handleMouseLeave() {
-            this.isHidden = true;
-        },
-    },
-    mounted() {
-        window.addEventListener('mousemove', this.handleMouseEnter);
-        window.addEventListener('mouseleave', this.handleMouseLeave);
-    },
-    beforeUnmount() {
-        window.removeEventListener('mousemove', this.handleMouseEnter);
-        window.removeEventListener('mouseleave', this.handleMouseLeave);
+
+            // 监听刷新事件
+            eventBus.on('refreshSidebar', refreshSidebar);
+        });
+
+        
+
+        const refreshSidebar = () => {
+            console.log('Sidebar refresh event received');
+            // 调用forceUpdate方法
+            
+            proxy.$forceUpdate();
+            console.log('99');
+            //componentKey.value += 1; // 改变 key 的值，强制重新渲染组件
+        };
+
+        const toggleSidebar = () => {
+            isHidden.value = !isHidden.value;
+        };
+
+        const showSidebar = () => {
+            isHidden.value = false;
+        };
+
+        const hideSidebar = () => {
+            isHidden.value = true;
+        };
+
+        const handleLogout = () => {
+            isLoggedIn.value = false;
+            username.value = '';
+            eraseCookie('username');
+            eraseCookie('encryptedPassword');
+            eraseCookie('user_id');
+        };
+        
+
+        return {
+            isHidden,
+            isLoggedIn,
+            username,
+            componentKey, // 返回 key 属性
+            toggleSidebar,
+            showSidebar,
+            hideSidebar,
+            handleLogout
+        };
     }
 };
 </script>
@@ -163,6 +219,11 @@ export default {
     border-radius: 0.94rem;
     margin: 20px;
 }
+.footer-logo img{
+    width: 35px;
+    height: 35px;
+    border-radius: 0.7rem;
+}
 
 .footer-logo .section_9 {
     background-color: #dedede;
@@ -179,5 +240,26 @@ export default {
     font-family: SourceHanSansCN;
     line-height: 0.92rem;
     letter-spacing: 0.13rem;
+}
+
+.logo{
+    position:fixed;
+}
+.logo-text{
+    position: fixed;
+}
+
+.logout-btn {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #ff7875;
 }
 </style>

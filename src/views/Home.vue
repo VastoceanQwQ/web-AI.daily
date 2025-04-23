@@ -1,7 +1,7 @@
 <!-- src/views/Home.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <div class="card-description">开发版界面 · Ver 20250421-001 · 20:45
+        <div class="card-description">开发版界面 · Ver 20250423-001 · 19:27
             <div>
                 <button @click="clearCards" class="test-button">删除所有卡片</button><span>&nbsp&nbsp&nbsp</span>
                 <button @click="loadSampleData" class="test-button">加载示例数据</button>

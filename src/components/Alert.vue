@@ -29,7 +29,7 @@ export default {
     methods: {
         showAlert(message, type) {
             const icons = {
-                info: '💡',
+                info: 'ℹ️',
                 success: '✅',
                 warning: '⚠️',
                 error: '❌',
@@ -83,11 +83,11 @@ export default {
     padding: 10px 20px; /* 增加一些水平内边距 */
     margin-bottom: 10px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
-    color: white;
+    color: rgb(71, 67, 67);
     font-size: 14px;
     max-width: 100%; /* 确保最大宽度不超过容器 */
     white-space: pre-wrap; /* 确保文本换行 */
@@ -99,7 +99,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px; /* 增大图标字体大小 */
+    font-size: 15px; /* 增大图标字体大小 */
 }
 
 .alert-message {
@@ -109,26 +109,26 @@ export default {
 }
 
 .alert.info {
-    background-color: #74c1fc6e;
-    border: 1px solid #74c0fc;
+    background-image: linear-gradient(0deg, #ffffffcb 0%, #c8e6fd 100%);
+    border: 1.5px solid #74c0fc;
     backdrop-filter: blur(7.5px);
 }
 
 .alert.success {
-    background-color: #8ce99aa2;
-    border: 1px solid #8ce99a;
+    background-image: linear-gradient(0deg, #ffffffcb 0%, #ccfbd2 100%);
+    border: 1.5px solid #8ce99adb;
     backdrop-filter: blur(7.5px);
 }
 
 .alert.warning {
-    background-color: #ffec9983;
-    border: 1px solid #ffec99f8;
+    background-image: linear-gradient(0deg, #ffffffcb 0%, #fdf0bbf8 100%);
+    border: 1.5px solid #ffec99;
     backdrop-filter: blur(7.5px);
 }
 
 .alert.error {
-    background-color: #ff6b6b83;
-    border: 1px solid #ff6b6b;
+    background-image: linear-gradient(0deg,#ffffffcb 0%,#ffd7d7 100% );
+    border: 1.5px solid #ff6b6b98;
     backdrop-filter: blur(7.5px);
 }
 </style>

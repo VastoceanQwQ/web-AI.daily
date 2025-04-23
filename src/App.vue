@@ -1,16 +1,21 @@
 <!-- src/App.vue -->
 <template>
     <router-view></router-view>
-    <sidebar></sidebar>
+    <Sidebar ref="sidebar"></Sidebar>
 </template>
 
 <script>
-import Sidebar from './components/Sidebar.vue'; // 确保路径正确
+import Sidebar from './components/Sidebar.vue';
 
 export default {
     components: {
-        Sidebar,
+        Sidebar: Sidebar
     },
+    provide() {
+        return {
+            sidebar: this.$refs.sidebar
+        };
+    }
 };
 </script>
 

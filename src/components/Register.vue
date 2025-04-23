@@ -1,7 +1,8 @@
+<!-- src/components/Register.vue -->
 <template>
     <div class="login" ref="registerCard">
         <div class="image">
-            <img src="@/assets/img/img002.png" alt="Register Image" />
+            <img src="@/assets/img/img002.jpg" alt="Register Image" />
         </div>
         <div class="loginform">
             <h2>注册</h2>
@@ -24,7 +25,10 @@
                         :class="{ 'is-invalid': errors.passwordAgain, 'is-valid': !errors.passwordAgain && passwordAgain && isSubmitted }"
                         @blur="resetValidation('passwordAgain')" />
                 </div>
-                <button type="submit" class="btn">注册</button>
+                <button type="submit" class="btn" :disabled="isLoading || registerSuccess"
+                    :class="{ 'loading': isLoading, 'success': registerSuccess }">
+                    {{ isLoading ? '正在注册...' : registerSuccess ? '注册成功' : '注册' }}
+                </button>
                 <p class="msg">已有账号？<router-link to="/login">登录</router-link></p>
             </form>
         </div>
@@ -35,7 +39,8 @@
 <script>
 import scrollReveal from 'scrollreveal';
 import Alert from './Alert.vue';
-import { CozeAPI } from '@coze/api';
+import axios from 'axios';
+import CryptoJS from 'crypto-js'; // 导入 crypto-js
 
 export default {
     components: {
@@ -50,6 +55,9 @@ export default {
             errors: {},
             isSubmitted: false, // 新增一个标志位，表示是否已提交
             api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
+            workflow_id: '7495766150467895306',
+            isLoading: false, // 新增一个标志位，表示是否正在加载
+            registerSuccess: false, // 新增一个标志位，表示是否注册成功
         };
     },
     mounted() {
@@ -59,6 +67,8 @@ export default {
         async handleRegister() {
             this.errors = {};
             this.isSubmitted = true; // 设置为已提交
+            this.isLoading = true; // 设置为正在加载
+            this.registerSuccess = false; // 重置注册成功状态
             let isValid = true;
             let errorMessages = [];
 
@@ -92,52 +102,78 @@ export default {
             }
 
             if (isValid) {
-                console.log('Validation passed'); // 确认是否进入这一块
-                // 处理注册逻辑
-                console.log('Username:', this.user_name);
-                console.log('Password:', this.user_password);
-                console.log('0');
-
-                console.log('1');
                 try {
-                    const apiClient = new CozeAPI({
-                        token: this.api_token,
-                        baseURL: 'https://api.coze.cn'
-                    });
-                    console.log('2');
-                } catch (error) {
-                    console.error('CozeAPI 初始化失败:', error);
-                }
+                    // 对密码进行 MD5 加密
+                    const encryptedPassword = CryptoJS.MD5(this.user_password).toString();
 
-                try {
-                    const res = await apiClient.workflows.runs.stream({
-                        workflow_id: '7495766150467895306',
-                        parameters: {
-                            "name": this.user_name,
-                            "password": this.user_password
+                    const response = await axios.post(
+                        `https://api.coze.cn/v1/workflow/run`,
+                        {
+                            workflow_id: this.workflow_id,
+                            parameters: {
+                                name: this.user_name,
+                                password: encryptedPassword
+                            }
                         },
-                    });
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${this.api_token}`
+                            }
+                        }
+                    );
 
-                    console.log('API Response:', res);
-                    this.code = 1;
-                    this.$refs.alertComponent.showAlert('注册成功', 'success');
+                    // 解析 JSON 字符串
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(response.data.data);
+                    } catch (parseError) {
+                        console.error('解析 JSON 字符串失败:', parseError);
+                        this.$refs.alertComponent.showAlert('解析响应数据失败，请重试', 'error');
+                        return;
+                    }
+
+                    console.log('Parsed API Response:', responseData);
+
+                    if (responseData.code === 1) {
+                        this.$refs.alertComponent.showAlert('注册成功，3秒后将跳转到登录页', 'success');
+
+                        // 设置注册成功状态
+                        this.registerSuccess = true;
+
+                        // 注册成功后3秒自动跳转到登录页面
+                        setTimeout(() => {
+                            this.$router.push('/login');
+                        }, 3000);
+                    } else if (responseData.code === 0) {
+                        this.$refs.alertComponent.showAlert('用户名已存在', 'error');
+                        this.errors.user_name = true; // 将用户名输入框标红
+                    } else {
+                        this.$refs.alertComponent.showAlert(responseData.msg || '注册失败', 'error');
+                    }
+
                 } catch (error) {
                     console.error('注册失败:', error);
+                    let errorMsg = '注册失败，请重试';
+
                     if (error.response) {
                         console.error('API 错误响应:', error.response.data);
-                        console.error('API 错误状态码:', error.response.status);
-                        console.error('API 错误头:', error.response.headers);
+                        errorMsg = error.response.data.msg || errorMsg;
                     } else if (error.request) {
-                        console.error('API 请求对象:', error.request);
+                        console.error('API 请求未收到响应:', error.request);
+                        errorMsg = '网络错误，请检查网络连接';
                     } else {
-                        console.error('API 错误信息:', error.message);
+                        console.error('API 配置错误:', error.message);
                     }
-                    this.$refs.alertComponent.showAlert('注册失败，请重试', 'error');
+
+                    this.$refs.alertComponent.showAlert(errorMsg, 'error');
+                } finally {
+                    this.isLoading = false; // 请求完成后设置为未加载
                 }
             } else {
-                console.log('Validation failed'); // 确认是否进入这一块
                 const combinedErrors = errorMessages.join('\n');
                 this.$refs.alertComponent.showAlert(combinedErrors, 'error');
+                this.isLoading = false; // 验证失败时设置为未加载
             }
         },
         initScrollReveal() {
@@ -172,7 +208,7 @@ export default {
     height: 400px;
     margin: 0 auto;
     background-color: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(10px);
+
     border-radius: 12px;
     box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.1);
     position: absolute;
@@ -185,12 +221,17 @@ export default {
 }
 
 .login .image {
-    flex: 0.65;
-    /* 图片占65% */
-    background-color: #000;
-    border-radius: 12px 0 0 12px;
+    position: absolute;
+    /* 绝对定位 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #00000000;
+    border-radius: 12px;
     overflow: hidden;
-    position: relative;
+    z-index: 1;
+    /* 确保图片在表单下方 */
 }
 
 .login .image img {
@@ -213,15 +254,23 @@ export default {
 }
 
 .login .loginform {
-    flex: 0.35;
-    /* 表单占35% */
+    position: absolute;
+    /* 绝对定位 */
+    top: 0;
+    right: 0;
+    width: 38%;
+    height: 100%;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(255, 255, 255, 0.85);
+    /* 调整背景颜色以确保表单可见 */
+    backdrop-filter: blur(20px);
     border-radius: 0 12px 12px 0;
+    z-index: 2;
+    /* 确保表单在图片上方 */
 }
 
 .login .loginform h2 {
@@ -272,21 +321,23 @@ export default {
 .login .loginform input.is-invalid {
     border-color: #dc3545;
     /* 验证失败时外框为红色 */
-    background-color: #f8d7da;
+    background-image: linear-gradient(0deg, #fff3f3cb 0%, #ffe5e5 100%);
     /* 验证失败时底色为红色 */
+    backdrop-filter: blur(7.5px);
 }
 
 .login .loginform input.is-valid {
     border-color: #28a745;
     /* 验证通过时外框为绿色 */
-    background-color: #d4edda;
+    background-image: linear-gradient(0deg, #f4fff6 0%, #e7ffeb 100%);
     /* 验证通过时底色为绿色 */
+    backdrop-filter: blur(7.5px);
 }
 
 .login .loginform .btn {
     width: 100%;
     padding: 10px;
-    background-image: linear-gradient(0deg, #eedde0c1 0%, #d7e6fccb 95%, #d3e2f8 100%);
+    background-image: linear-gradient(0deg, #ffeef1 0%, #e2eeff 95%, #e1edfe 100%);
     border-radius: 3px;
     color: #333;
     border: 1px solid #d0d0d0;
@@ -296,9 +347,23 @@ export default {
 }
 
 .login .loginform .btn:hover {
-    background-image: linear-gradient(0deg, #f4d5dab4 0%, #c3d8f7b6 99%, #b6d2f8 100%);
+    background-image: linear-gradient(0deg, #ffeef1fe 0%, #e2eeff 95%, #e1edfe 100%);
     border-color: #007bff;
     transition: 0.2s;
+}
+
+.login .loginform .btn.loading {
+    background-image: linear-gradient(0deg, #ffeef156 0%, #e2eeff67 95%, #e1edfe66 100%);
+    color: #888;
+    border-color: #989898;
+    cursor: not-allowed;
+}
+
+.login .loginform .btn.success {
+    background-image: linear-gradient(0deg, #ccfbd2a4 0%, #ccfbd2a3 100%);
+    border: 1.5px solid #8ce99adb;
+    backdrop-filter: blur(7.5px);
+    cursor: not-allowed;
 }
 
 .login .loginform .msg {
