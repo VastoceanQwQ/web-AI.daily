@@ -113,6 +113,7 @@ export default {
             eraseCookie('username');
             eraseCookie('encryptedPassword');
             eraseCookie('user_id');
+            indow.location.href = '/login';
         };
         
 

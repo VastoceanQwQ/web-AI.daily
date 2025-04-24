@@ -21,12 +21,27 @@
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
+                <div class="card-buttons">
+                    <el-button 
+                        v-for="(color, type) in themeColors" 
+                        :key="type" 
+                        @click="addCard(type)"
+                        :style="{ border: `2px dashed ${color}` }"
+                        class="card-button"
+                    >
+                        {{ getEmoji(type) }} {{ getChineseType(type) }}
+                    </el-button>
+                </div>
                 <div class="time-setting">
                     <el-form label-position="left" label-width="100px">
                         <el-form-item label="生成时间">
+                            <el-time-picker v-model="generateTime" format="HH:mm" placeholder="选择时间"></el-time-picker>
                         </el-form-item>
-                        <el-date-picker v-model="generateTime" type="datetime" placeholder="选择日期时间"></el-date-picker>
                     </el-form>
+                </div>
+                <div class="action-buttons">
+                    <el-button type="primary" @click="saveChanges">保存</el-button>
+                    <el-button @click="discardChanges">放弃更改</el-button>
                 </div>
             </div>
         </div>
@@ -250,6 +265,44 @@ export default {
         };
     },
     methods: {
+        getEmoji(type) {
+            const emojiMap = {
+                weather: '☀️',
+                fortune: '🔮',
+                news: '🗞️',
+                text: '🏷️',
+                newstop: '📰',
+                health: '🏥',
+                music: '🎵',
+                traffic: '🚗',
+                economy: '📈',
+                calendar: '📅',
+                customAI: '🤖'
+            };
+            return emojiMap[type] || '📄';
+        },
+        getChineseType(type) {
+            const chineseTypeMap = {
+                weather: '天气',
+                fortune: '运势',
+                news: '定点新闻',
+                text: '自定义文本',
+                newstop: '热点新闻',
+                health: '健康',
+                music: '音乐',
+                traffic: '交通',
+                economy: '经济',
+                calendar: '每日日历',
+                customAI: '自定义AI'
+            };
+            return chineseTypeMap[type] || '未知';
+        },
+        saveChanges() {
+            // 保存更改的逻辑
+        },
+        discardChanges() {
+            // 放弃更改的逻辑
+        },
         addCard(type = 'text') {
             this.cards.push({
                 id: Date.now(),
@@ -307,41 +360,45 @@ export default {
 <style scoped>
 .edit-container {
     display: flex;
-    height: 100vh;
-    width: 100vw;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    padding: 0;
+    width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
     color: #000;
-}
-
-.edit-container h2{
-    font-weight: bold;
-    padding-bottom: 15px;
+    height: 100vh; /* 设置高度为100% */
 }
 
 .left-panel {
-    width: 25%;
+    width: 30%;
     padding: 20px;
     height: 100%;
+    overflow: hidden; /* 左半部分不可滚动 */
 }
 
 .right-panel {
     width: 70%;
     padding: 20px;
     height: 100%;
-}
-
-.left-panel .card{
-    width: 300px;
-    padding: 20px;
-    height: 95%;
+    overflow-y: auto; /* 右半部分可以滚动 */
 }
 
 .right-panel .card-container {
     column-count: 2;
-    column-gap: 0px;
+    column-gap: 20px; /* 两列间距 */
+}
+
+.left-panel .card {
+    width: 100%;
+    padding: 20px;
+    height: auto;
+}
+
+.right-panel .card {
+    width: 100%;
+}
+
+.edit-container h2{
+    font-weight: bold;
+    padding-bottom: 15px;
 }
 
 .card {
@@ -355,10 +412,6 @@ export default {
     break-inside: avoid;
     margin-bottom: 20px;
     position: relative;
-}
-
-.right-panel .card {
-    width: 400px;
 }
 
 .card.has-theme-color::before {
@@ -547,5 +600,31 @@ button:hover {
 .el-textarea__inner:read-only {
     background-color: #fff; /* 保持背景为白色 */
     cursor: text; /* 设置光标为文本输入状态 */
+}
+
+.card-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 两列布局 */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-button {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    background-color: #fff;
+    color: #000;
+    transition: background-color 0.3s;
+}
+
+.card-button:hover {
+    background-color: #f5f5f5;
 }
 </style>
