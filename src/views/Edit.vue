@@ -2,8 +2,8 @@
     <div class="edit-container">
         <div class="left-panel">
             <div class="card">
-                <h1 style="font-weight:600;">编辑</h1>
-                <p style="font-size: 12px;color:darkgray;margin-bottom: 20px;">每次改动将自动保存</p>
+                <h1 style="font-weight:600; margin-bottom: 5px;">编辑</h1>
+                <!--<p style="font-size: 12px;color:darkgray;margin-bottom: 20px;">每有改动将自动保存</p>-->
                 <el-dropdown @command="addCard">
                     <el-button type="primary" style="width: 257px;">添加卡片</el-button>
 
@@ -40,16 +40,20 @@
                         </el-form-item>
                         <p style="font-size: 12px;color:darkgray;">
                             生成时间为早报内容开始生成的时间点，从开始生成到完成并展示内容期间需要约5-10分钟的时间，推荐将时间提前10分钟设定以获得更好的体验。</p>
-
                     </el-form>
                     <p style="font-size: 12px;color: #ff8787; margin-top: 15px;">
                         注意：请填写所有卡片的必填参数且不要保留没有填写任何参数的卡片，否则生成的内容会出现比较大的偏差和问题！</p>
                 </div>
+                <!-- 新增手动保存按钮 -->
+                <el-button type="primary" style="width: 267px; margin-top: 20px;" @click="manualSave" :loading="loading">
+                    保存
+                </el-button>
             </div>
+
         </div>
         <div class="right-panel">
             <transition-group name="card-list" tag="div" class="card-container">
-                <div v-for="(card, index) in cards" :key="card.id" class="card"
+                <div v-for="(card, index) in cards" :key="card.card_id" class="card"
                     :class="{ 'has-header-image': card.headerImage, 'has-theme-color': !card.headerImage && themeColors[card.type] }"
                     :style="{ '--theme-color': !card.headerImage ? themeColors[card.type] : '' }">
 
@@ -63,12 +67,8 @@
                     <el-form label-position="left" label-width="100px" class="form-right-align">
                         <div v-if="card.type === 'calendar'">
                             <h2>📅 日历</h2>
-                            <el-form-item label="名言警句类型">
-                                <el-input v-model="card.quoteType" />
-                            </el-form-item>
-                            <el-form-item label="图像提示词">
-                                <el-input type="textarea" v-model="card.imagePrompt"
-                                    :autosize="{ minRows: 2, maxRows: 6 }" placeholder="请用自然语言描述日历展示或生成需求" />
+                            <el-form-item label=" 生成图片">
+                                <el-switch v-model="card.generateImage" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'weather'">
@@ -184,7 +184,8 @@
                                 <el-input placeholder="留空则不展示头图" v-model="card.headerImageLink" />
                             </el-form-item>
                             <el-form-item label="正文内容">
-                                <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }" />
+                                <el-input type="textarea" v-model="card.content"
+                                    :autosize="{ minRows: 2, maxRows: 6 }" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'customAI'">
@@ -197,7 +198,7 @@
                         </div>
                         <div v-else>
                             <el-form-item label="ID:">
-                                <el-input v-model="card.id" />
+                                <el-input v-model="card.card_id" />
                             </el-form-item>
                             <el-form-item label="类型:">
                                 <el-select v-model="card.type">
@@ -206,7 +207,7 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="排序:">
-                                <el-input-number v-model="card.order" />
+                                <el-input-number v-model="card.card_number" />
                             </el-form-item>
                             <el-form-item label="标题:">
                                 <el-input v-model="card.title" />
@@ -218,10 +219,10 @@
 
                         <!-- 显示卡片ID和顺序 -->
                         <el-form-item label="卡片ID">
-                            <span>{{ card.id }}</span>
+                            <span>{{ card.card_id }}</span>
                         </el-form-item>
                         <el-form-item label="顺序">
-                            <span>{{ card.order }}</span>
+                            <span>{{ card.card_number }}</span>
                         </el-form-item>
                     </el-form>
                 </div>
@@ -231,7 +232,7 @@
 </template>
 
 <script>
-import { ElButton, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElInputNumber, ElCheckbox, ElDatePicker, ElDropdown, ElDropdownMenu, ElDropdownItem, ElSwitch } from 'element-plus';
+import { ElButton, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElInputNumber, ElCheckbox, ElDatePicker, ElDropdown, ElDropdownMenu, ElDropdownItem, ElSwitch, ElMessage } from 'element-plus';
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { getCookie } from '@/utils/cookieUtils';
@@ -251,7 +252,8 @@ export default {
         ElDatePicker,
         ElDropdown,
         ElDropdownMenu,
-        ElDropdownItem
+        ElDropdownItem,
+        ElMessage
     },
     data() {
         return {
@@ -269,7 +271,9 @@ export default {
                 economy: '#ffdeeb',
                 calendar: '#d0ebff',
                 customAI: '#ced4da'
-            }
+            },
+            loading: false, // 新增 loading 状态
+            timeApiUrl: 'https://api.coze.cn/v1/workflow/run' // 新增时间 API URL
         };
     },
     methods: {
@@ -306,63 +310,128 @@ export default {
             return chineseTypeMap[type] || '未知';
         },
         saveChanges() {
-            // 确保所有卡片的信息参数都能被正确传递
-            const updatedCards = this.cards.map(card => ({
-                card_id: card.id,
-                data_type: card.type,
-                data: {
-                    card_number: card.order,
-                    title: card.title,
-                    content: card.content,
-                    headerImage: card.headerImage,
-                    city: card.city,
-                    ip: card.ip,
-                    requirement: card.requirement,
-                    height: card.height,
-                    weight: card.weight,
-                    age: card.age,
-                    quality: card.quality,
-                    preference: card.preference,
-                    transport: card.transport,
-                    start: card.start,
-                    destination: card.destination,
-                    zodiac: card.zodiac,
-                    constellation: card.constellation,
-                    generateImage: card.generateImage,
-                    infoType: card.infoType,
-                    quoteType: card.quoteType,
-                    imagePrompt: card.imagePrompt,
-                    typeKeywords: card.typeKeywords,
-                    location: cascaderEmits.location,
-                    headerImageLink: card.headerImageLink
-                }
-            }));
+            // 检查是否有需要保存的卡片
+            if (this.cards.length === 0) {
+                return;
+            }
 
-            // 调用 API 保存更改
-            axios.post(
-                `https://api.coze.cn/v1/workflow/run`,
-                {
-                    workflow_id: '7496712396578783282', // 假设这是保存卡片的workflow_id
-                    parameters: {
-                        user_id: getCookie('user_id'),
-                        cards: updatedCards
-                    }
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
-                    }
+            // 遍历所有卡片并依次保存
+            this.cards.forEach((card) => {
+                // 根据卡片类型提取相关参数
+                let relevantParams = {};
+                switch (card.type) {
+                    case 'weather':
+                        relevantParams = {
+                            city: card.city,
+                            ip: card.ip,
+                            requirement: card.requirement
+                        };
+                        break;
+                    case 'calendar':
+                        relevantParams = {
+                            generateImage: card.generateImage
+                        };
+                        break;
+                    case 'news':
+                        relevantParams = {
+                            generateImage: card.generateImage,
+                            typeKeywords: card.typeKeywords
+                        };
+                        break;
+                    case 'newstop':
+                        relevantParams = {
+                            generateImage: card.generateImage
+                        };
+                        break;
+                    case 'health':
+                        relevantParams = {
+                            height: card.height,
+                            weight: card.weight,
+                            age: card.age,
+                            requirement: card.requirement
+                        };
+                        break;
+                    case 'music':
+                        relevantParams = {
+                            quality: card.quality,
+                            preference: card.preference
+                        };
+                        break;
+                    case 'traffic':
+                        relevantParams = {
+                            transport: card.transport,
+                            start: card.start,
+                            destination: card.destination,
+                            location: card.location
+                        };
+                        break;
+                    case 'fortune':
+                        relevantParams = {
+                            generateImage: card.generateImage,
+                            zodiac: card.zodiac,
+                            constellation: card.constellation
+                        };
+                        break;
+                    case 'economy':
+                        relevantParams = {
+                            generateImage: card.generateImage,
+                            infoType: card.infoType
+                        };
+                        break;
+                    case 'text':
+                        relevantParams = {
+                            title: card.title,
+                            headerImageLink: card.headerImageLink,
+                            content: card.content
+                        };
+                        break;
+                    case 'customAI':
+                        relevantParams = {
+                            requirement: card.requirement
+                        };
+                        break;
+                    default:
+                        relevantParams = {};
                 }
-            ).then(response => {
-                const responseData = JSON.parse(response.data.data);
-                if (responseData.code === 1) {
-                    console.log('Changes saved successfully');
-                } else {
-                    console.error('Failed to save changes:', responseData.msg);
-                }
-            }).catch(error => {
-                console.error('Error saving changes:', error);
+
+                // 构造保存数据
+                const cardData = {
+                    card_id: card.card_id,
+                    data_type: card.type,
+                    data: JSON.stringify({
+                        ...relevantParams,
+                        card_number: card.card_number // 每次都保存顺序
+                    })
+                };
+
+                // 调用API保存卡片信息
+                axios.post(
+                    `https://api.coze.cn/v1/workflow/run`,
+                    {
+                        workflow_id: '7496722349124993061', // 假设这是保存卡片的workflow_id
+                        parameters: {
+                            user_id: getCookie('user_id'),
+                            card_id: cardData.card_id,
+                            data_type: cardData.data_type,
+                            data: cardData.data
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                ).then(response => {
+                    const responseData = JSON.parse(response.data.data);
+                    if (responseData.code === 1) {
+                        console.log(`Card ${cardData.card_id} saved successfully`);
+                    } else {
+                        console.error(`Failed to save card ${cardData.card_id}:`, responseData.msg);
+                    }
+                }).catch(error => {
+                    console.error(`Error saving card ${cardData.card_id}:`, error);
+                });
             });
         },
         discardChanges() {
@@ -370,9 +439,9 @@ export default {
         },
         addCard(type = 'text') {
             this.cards.push({
-                id: Date.now(),
+                card_id: Date.now(),
                 type: type,
-                order: this.cards.length + 1,
+                card_number: this.cards.length + 1,
                 title: '',
                 content: '',
                 headerImage: '',
@@ -389,14 +458,15 @@ export default {
                 destination: '',
                 zodiac: '',
                 constellation: '',
-                generateImage: false,
+                generateImage: true,
                 infoType: '',
-                quoteType: '',
-                imagePrompt: '',
                 typeKeywords: '',
                 location: '',
                 headerImageLink: ''
             });
+
+            // 新增：在添加卡片后立即触发自动保存
+            this.autoSave();
         },
         getIP() {
             // 获取IP的逻辑
@@ -409,18 +479,36 @@ export default {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index - 1];
                 this.cards[index - 1] = temp;
+
+                // 更新卡片顺序
+                this.cards.forEach((card, i) => {
+                    card.card_number = i + 1;
+                });
             }
         },
+
         moveCardDown(index) {
             if (index < this.cards.length - 1) {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index + 1];
                 this.cards[index + 1] = temp;
+
+                // 更新卡片顺序
+                this.cards.forEach((card, i) => {
+                    card.card_number = i + 1;
+                });
             }
         },
+
         deleteCard(index) {
             this.cards.splice(index, 1);
+
+            // 更新卡片顺序
+            this.cards.forEach((card, i) => {
+                card.card_number = i + 1;
+            });
         },
+
         async fetchCards() {
             const user_id = getCookie('user_id');
             if (!user_id) {
@@ -460,31 +548,29 @@ export default {
                         console.log(cardData.new);
                         // 确保所有字段都正确映射
                         return {
-                            id: card.card_id,
+                            card_id: card.card_id,
                             type: card.data_type,
-                            order: cardData.card_number,
+                            card_number: cardData.card_number,
                             title: cardData.title || '', // 自定义文本-标题-str
                             content: cardData.content || '', // 自定义文本-正文内容-str
-                            headerImageLink: cardData.image_link || '',  // 自定义文本-头图链接-str
+                            headerImageLink: cardData.headerImageLink || '',  // 自定义文本-头图链接-str
                             city: cardData.city || '',  // 天气-城市-str
                             ip: cardData.ip || '',      // 天气-IP地址-str
                             requirement: cardData.requirement || '',  // 多种卡片-更多需求-str
-                            height: cardData.high || '', // 健康-身高-str
+                            height: cardData.height || '', // 健康-身高-str
                             weight: cardData.weight || '', // 健康-体重-str
-                            age: cardData.year || '',    // 健康-年龄-str
-                            quality: cardData.level || 'standard',  // 音乐-音质-str
-                            preference: cardData.like || '',  // 音乐-喜爱偏向-str
-                            transport: cardData.transfaction || '任意',  // 出行-出行方式-str
-                            start: cardData.location || '', // 出行-起始地-str
+                            age: cardData.age || '',    // 健康-年龄-str
+                            quality: cardData.quality || 'standard',  // 音乐-音质-str
+                            preference: cardData.preference || '',  // 音乐-喜爱偏向-str
+                            transport: cardData.transport || '任意',  // 出行-出行方式-str
+                            start: cardData.start || '', // 出行-起始地-str
                             destination: cardData.destination || '',  // 出行-目的地-str
-                            location: cardData.destination_get || '', // 出行-经纬度位置-str
-                            zodiac: cardData.sxname || '',  //运势-生肖-str
-                            constellation: cardData.xzname || '', // 运势-星座-str
-                            generateImage: cardData.img || false,  // 多种卡片-生成图片-bool
-                            infoType: cardData.new || '',         // 财经-信息类型-str
-                            quoteType: card.data.quoteType || '',
-                            imagePrompt: card.data.imagePrompt || '' ,
-                            typeKeywords: cardData.keyword || '' //定点新闻-类型关键词-str
+                            location: cardData.location || '', // 出行-经纬度位置-str
+                            zodiac: cardData.zodiac || '',  // 运势-生肖-str
+                            constellation: cardData.constellation || '', // 运势-星座-str
+                            generateImage: cardData.generateImage || false,  // 多种卡片-生成图片-bool
+                            infoType: cardData.infoType || '',         // 财经-信息类型-str
+                            typeKeywords: cardData.typeKeywords || '' //定点新闻-类型关键词-str
                         };
                     });
                 } else {
@@ -493,10 +579,99 @@ export default {
             } catch (error) {
                 console.error('Error fetching cards:', error);
             }
+        },
+
+        async fetchGenerateTime() {
+            try {
+                const response = await axios.post(
+                    this.timeApiUrl,
+                    {
+                        workflow_id: '7494504516701274162', // 假设这是获取生成时间的 workflow_id
+                        parameters: {
+                            user_id: getCookie('user_id'),
+                            time: "* * * * * *"
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+                const responseData = JSON.parse(response.data.data);
+                if (responseData.code === 3) {
+                    // 将 Cron 表达式转换为 HH:mm 格式
+                    const cronTime = responseData.time.split(' ');
+                    this.generateTime = `${cronTime[1]}:${cronTime[0]}`;
+                } else {
+                    console.error('Failed to fetch generate time:', responseData.msg);
+                }
+            } catch (error) {
+                console.error('Error fetching generate time:', error);
+            }
+        },
+
+        async saveGenerateTime() {
+            try {
+                // 将 HH:mm 转换为 Cron 表达式
+                const [hour, minute] = this.generateTime.split(':');
+                const cronTime = `0 ${minute} ${hour} * * *`;
+
+                const response = await axios.post(
+                    this.timeApiUrl,
+                    {
+                        workflow_id: '7496722349124993061', // 假设这是保存生成时间的 workflow_id
+                        parameters: {
+                            user_id: getCookie('user_id'),
+                            time: cronTime
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+                const responseData = JSON.parse(response.data.data);
+                if (responseData.code === 1 && responseData.code === 2) {
+                    console.log('生成时间保存成功');
+                } else {
+                    console.error('生成时间保存失败');
+                }
+            } catch (error) {
+                console.error('Error saving generate time:', error);
+                console.error('生成时间保存失败');
+            }
+        },
+
+        async manualSave() {
+            if (this.loading) return; // 防止重复提交
+
+            if (!this.generateTime) {
+                ElMessage.warning('请设置生成时间');
+                return;
+            }
+
+            this.loading = true;
+            ElMessage.info('正在保存...');
+
+            try {
+                await this.saveGenerateTime(); // 保存生成时间
+                await this.saveChanges(); // 保存卡片信息
+                ElMessage.success('保存成功');
+            } catch (error) {
+                console.error('Error during manual save:', error);
+                ElMessage.error('保存失败');
+            } finally {
+                this.loading = false;
+            }
         }
     },
     mounted() {
         this.fetchCards();
+        this.fetchGenerateTime(); // 页面加载时获取生成时间
     }
 };
 </script>
@@ -520,6 +695,7 @@ export default {
     /* 固定定位 */
     top: 20;
     /* 固定在顶部 */
+    user-select: none;
 }
 
 .left-panel .card {
@@ -736,7 +912,6 @@ button:hover {
     cursor: pointer;
     transition: opacity 0.2s;
     opacity: 0.6;
-
 }
 
 .card-actions img:hover {
