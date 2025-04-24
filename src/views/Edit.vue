@@ -9,17 +9,17 @@
 
                     <template #dropdown>
                         <el-dropdown-menu>
+                            <el-dropdown-item command="calendar">日历</el-dropdown-item>
                             <el-dropdown-item command="weather">天气</el-dropdown-item>
                             <el-dropdown-item command="fortune">运势</el-dropdown-item>
                             <el-dropdown-item command="news">定点新闻</el-dropdown-item>
-                            <el-dropdown-item command="text">自定义文本</el-dropdown-item>
                             <el-dropdown-item command="newstop">热点新闻</el-dropdown-item>
                             <el-dropdown-item command="health">健康</el-dropdown-item>
                             <el-dropdown-item command="music">音乐</el-dropdown-item>
-                            <el-dropdown-item command="traffic">交通</el-dropdown-item>
-                            <el-dropdown-item command="economy">经济</el-dropdown-item>
-                            <el-dropdown-item command="calendar">每日日历</el-dropdown-item>
-                            <el-dropdown-item command="customAI">自定义AI</el-dropdown-item>
+                            <el-dropdown-item command="traffic">出行</el-dropdown-item>
+                            <el-dropdown-item command="economy">财经</el-dropdown-item>
+                            <el-dropdown-item command="text">自定义文本</el-dropdown-item>
+                            <el-dropdown-item command="customAI">自定义应用</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
 
@@ -39,7 +39,7 @@
                                 end="11:00" step="00:10"></el-TimeSelect>
                         </el-form-item>
                         <p style="font-size: 12px;color:darkgray;">
-                            此时间为早报内容开始生成的时间，从开始生成内容到展示内容期间需要约5-10分钟的时间，推荐将时间提前10分钟设定以获得更好的体验</p>
+                            生成时间为早报内容开始生成的时间点，从开始生成到完成并展示内容期间需要约5-10分钟的时间，推荐将时间提前10分钟设定以获得更好的体验。</p>
 
                     </el-form>
                     <p style="font-size: 12px;color: #ff8787; margin-top: 15px;">
@@ -61,7 +61,17 @@
                     </div>
 
                     <el-form label-position="left" label-width="100px" class="form-right-align">
-                        <div v-if="card.type === 'weather'">
+                        <div v-if="card.type === 'calendar'">
+                            <h2>📅 日历</h2>
+                            <el-form-item label="名言警句类型">
+                                <el-input v-model="card.quoteType" />
+                            </el-form-item>
+                            <el-form-item label="图像提示词">
+                                <el-input type="textarea" v-model="card.imagePrompt"
+                                    :autosize="{ minRows: 2, maxRows: 6 }" placeholder="请用自然语言描述日历展示或生成需求" />
+                            </el-form-item>
+                        </div>
+                        <div v-else-if="card.type === 'weather'">
                             <h2>☀️ 天气</h2>
                             <el-form-item label="城市">
                                 <el-input v-model="card.city" />
@@ -79,6 +89,7 @@
                             <h2>📰 热点新闻</h2>
                             <el-form-item label=" 生成图片">
                                 <el-switch v-model="card.generateImage" />
+
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'news'">
@@ -111,7 +122,7 @@
                             <el-form-item label="音质">
                                 <el-select v-model="card.quality">
                                     <el-option label="标准" value="standard" />
-                                    <el-option label="高清" value="high" />
+                                    <el-option label="高清" value="higher" />
                                     <el-option label="无损" value="lossless" />
                                 </el-select>
                             </el-form-item>
@@ -120,9 +131,10 @@
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'traffic'">
-                            <h2>🚗 交通</h2>
+                            <h2>🚗 出行</h2>
                             <el-form-item label="出行方式">
                                 <el-select v-model="card.transport">
+                                    <el-option label="任意" value="任意" />
                                     <el-option label="步行" value="walk" />
                                     <el-option label="驾车" value="drive" />
                                     <el-option label="公共交通" value="public" />
@@ -135,9 +147,9 @@
                             <el-form-item label="目的地">
                                 <el-input v-model="card.destination" />
                             </el-form-item>
-                            <el-form-item label="IP 地址">
-                                <el-input v-model="card.ip" />
-                                <el-button @click="getIP">获取IP</el-button>
+                            <el-form-item label="经纬度位置">
+                                <el-input v-model="card.location" />
+                                <el-button @click="getLocation">获取定位</el-button>
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'fortune'">
@@ -154,39 +166,29 @@
 
                         </div>
                         <div v-else-if="card.type === 'economy'">
-                            <h2>📈 经济</h2>
+                            <h2>📈 财经</h2>
                             <el-form-item label="生成图片">
-                                <el-switch v-model="card.generateImage" />
+                                <el-switch v-model="card.generateImage" disabled />
                             </el-form-item>
                             <el-form-item label="信息类型">
                                 <el-input v-model="card.infoType" />
                             </el-form-item>
                         </div>
-                        <div v-else-if="card.type === 'calendar'">
-                            <h2>📅 每日日历</h2>
-                            <el-form-item label="名言警句类型">
-                                <el-input v-model="card.quoteType" />
-                            </el-form-item>
-                            <el-form-item label="图像提示词">
-                                <el-input type="textarea" v-model="card.imagePrompt"
-                                    :autosize="{ minRows: 2, maxRows: 6 }" placeholder="请用自然语言描述日历展示或生成需求" />
-                            </el-form-item>
-                        </div>
+
                         <div v-else-if="card.type === 'text'">
                             <h2>🏷️ 自定义文本</h2>
                             <el-form-item label="卡片标题">
-                                <el-input v-model="card.title" />
+                                <el-input v-model="card.title" placeholder="留空则不显示标题" />
                             </el-form-item>
                             <el-form-item label="头图链接">
                                 <el-input placeholder="留空则不展示头图" v-model="card.headerImageLink" />
                             </el-form-item>
                             <el-form-item label="正文内容">
-                                <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }"
-                                    placeholder="请用自然语言描述需求" />
+                                <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'customAI'">
-                            <h2>🤖 自定义AI</h2>
+                            <h2>✨ 自定义应用</h2>
                             <el-form-item label="需求">
                                 <el-input type="textarea" v-model="card.requirement"
                                     :autosize="{ minRows: 4, maxRows: 6 }"
@@ -213,6 +215,14 @@
                                 <el-input type="textarea" v-model="card.content" />
                             </el-form-item>
                         </div>
+
+                        <!-- 显示卡片ID和顺序 -->
+                        <el-form-item label="卡片ID">
+                            <span>{{ card.id }}</span>
+                        </el-form-item>
+                        <el-form-item label="顺序">
+                            <span>{{ card.order }}</span>
+                        </el-form-item>
                     </el-form>
                 </div>
             </transition-group>
@@ -222,6 +232,9 @@
 
 <script>
 import { ElButton, ElForm, ElFormItem, ElInput, ElSelect, ElOption, ElInputNumber, ElCheckbox, ElDatePicker, ElDropdown, ElDropdownMenu, ElDropdownItem, ElSwitch } from 'element-plus';
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
+import { getCookie } from '@/utils/cookieUtils';
 
 export default {
     name: 'Edit',
@@ -272,28 +285,85 @@ export default {
                 traffic: '🚗',
                 economy: '📈',
                 calendar: '📅',
-                customAI: '🤖'
+                customAI: '✨'
             };
             return emojiMap[type] || '📄';
         },
         getChineseType(type) {
             const chineseTypeMap = {
+                calendar: '日历',
                 weather: '天气',
                 fortune: '运势',
                 news: '定点新闻',
-                text: '自定义文本',
                 newstop: '热点新闻',
                 health: '健康',
                 music: '音乐',
-                traffic: '交通',
-                economy: '经济',
-                calendar: '每日日历',
-                customAI: '自定义AI'
+                traffic: '出行',
+                economy: '财经',
+                text: '自定义文本',
+                customAI: '自定义应用'
             };
             return chineseTypeMap[type] || '未知';
         },
         saveChanges() {
-            // 保存更改的逻辑
+            // 确保所有卡片的信息参数都能被正确传递
+            const updatedCards = this.cards.map(card => ({
+                card_id: card.id,
+                data_type: card.type,
+                data: {
+                    card_number: card.order,
+                    title: card.title,
+                    content: card.content,
+                    headerImage: card.headerImage,
+                    city: card.city,
+                    ip: card.ip,
+                    requirement: card.requirement,
+                    height: card.height,
+                    weight: card.weight,
+                    age: card.age,
+                    quality: card.quality,
+                    preference: card.preference,
+                    transport: card.transport,
+                    start: card.start,
+                    destination: card.destination,
+                    zodiac: card.zodiac,
+                    constellation: card.constellation,
+                    generateImage: card.generateImage,
+                    infoType: card.infoType,
+                    quoteType: card.quoteType,
+                    imagePrompt: card.imagePrompt,
+                    typeKeywords: card.typeKeywords,
+                    location: cascaderEmits.location,
+                    headerImageLink: card.headerImageLink
+                }
+            }));
+
+            // 调用 API 保存更改
+            axios.post(
+                `https://api.coze.cn/v1/workflow/run`,
+                {
+                    workflow_id: '7496712396578783282', // 假设这是保存卡片的workflow_id
+                    parameters: {
+                        user_id: getCookie('user_id'),
+                        cards: updatedCards
+                    }
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                    }
+                }
+            ).then(response => {
+                const responseData = JSON.parse(response.data.data);
+                if (responseData.code === 1) {
+                    console.log('Changes saved successfully');
+                } else {
+                    console.error('Failed to save changes:', responseData.msg);
+                }
+            }).catch(error => {
+                console.error('Error saving changes:', error);
+            });
         },
         discardChanges() {
             // 放弃更改的逻辑
@@ -314,7 +384,7 @@ export default {
                 age: '',
                 quality: 'standard',
                 preference: '',
-                transport: 'walk',
+                transport: '任意',
                 start: '',
                 destination: '',
                 zodiac: '',
@@ -322,7 +392,10 @@ export default {
                 generateImage: false,
                 infoType: '',
                 quoteType: '',
-                imagePrompt: ''
+                imagePrompt: '',
+                typeKeywords: '',
+                location: '',
+                headerImageLink: ''
             });
         },
         getIP() {
@@ -347,7 +420,83 @@ export default {
         },
         deleteCard(index) {
             this.cards.splice(index, 1);
+        },
+        async fetchCards() {
+            const user_id = getCookie('user_id');
+            if (!user_id) {
+                console.error('User ID not found in cookies');
+                return;
+            }
+
+            try {
+                const response = await axios.post(
+                    `https://api.coze.cn/v1/workflow/run`,
+                    {
+                        workflow_id: '7496712396578783282', // 假设这是获取卡片列表的workflow_id
+                        parameters: {
+                            user_id: user_id
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+
+                const responseData = JSON.parse(response.data.data);
+                console.log(responseData.code);
+                console.log("001");
+                if (responseData.code === 1) {
+                    console.log("002");
+                    this.cards = responseData.cards.map(card => {
+                        console.log(card);
+                        
+                        console.log(JSON.parse(card.data));
+                        const cardData = JSON.parse(card.data);
+
+                        console.log(cardData.img);
+                        console.log(cardData.new);
+                        // 确保所有字段都正确映射
+                        return {
+                            id: card.card_id,
+                            type: card.data_type,
+                            order: cardData.card_number,
+                            title: cardData.title || '', // 自定义文本-标题-str
+                            content: cardData.content || '', // 自定义文本-正文内容-str
+                            headerImageLink: cardData.image_link || '',  // 自定义文本-头图链接-str
+                            city: cardData.city || '',  // 天气-城市-str
+                            ip: cardData.ip || '',      // 天气-IP地址-str
+                            requirement: cardData.requirement || '',  // 多种卡片-更多需求-str
+                            height: cardData.high || '', // 健康-身高-str
+                            weight: cardData.weight || '', // 健康-体重-str
+                            age: cardData.year || '',    // 健康-年龄-str
+                            quality: cardData.level || 'standard',  // 音乐-音质-str
+                            preference: cardData.like || '',  // 音乐-喜爱偏向-str
+                            transport: cardData.transfaction || '任意',  // 出行-出行方式-str
+                            start: cardData.location || '', // 出行-起始地-str
+                            destination: cardData.destination || '',  // 出行-目的地-str
+                            location: cardData.destination_get || '', // 出行-经纬度位置-str
+                            zodiac: cardData.sxname || '',  //运势-生肖-str
+                            constellation: cardData.xzname || '', // 运势-星座-str
+                            generateImage: cardData.img || false,  // 多种卡片-生成图片-bool
+                            infoType: cardData.new || '',         // 财经-信息类型-str
+                            quoteType: card.data.quoteType || '',
+                            imagePrompt: card.data.imagePrompt || '' ,
+                            typeKeywords: cardData.keyword || '' //定点新闻-类型关键词-str
+                        };
+                    });
+                } else {
+                    console.error('Failed to fetch cards:', responseData.msg);
+                }
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+            }
         }
+    },
+    mounted() {
+        this.fetchCards();
     }
 };
 </script>
@@ -642,5 +791,16 @@ button:hover {
 .card-button:hover {
     background-color: #e4f7ff;
     color: #000;
+}
+
+/* 卡片底部信息的样式 */
+.el-form-item__label {
+    font-weight: bold;
+    color: #555;
+}
+
+.el-form-item__content span {
+    color: #999;
+    font-size: 12px;
 }
 </style>
