@@ -1,7 +1,7 @@
 <!-- src/views/Home.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <div class="card-description">开发版界面 · Ver 20250423-001 · 19:27
+        <div class="card-description">开发版界面 · Ver 20250424-001 · 9:15
             <div>
                 <button @click="clearCards" class="test-button">删除所有卡片</button><span>&nbsp&nbsp&nbsp</span>
                 <button @click="loadSampleData" class="test-button">加载示例数据</button>
@@ -45,12 +45,13 @@ export default {
     setup() {
         // 定义每种卡片类型的主题色
         const themeColors = {
-            date: '#d0ebff', 
-            weather: '#e9ecef', 
-            fortune: '#e5dbff', 
-            miku: '#c5f6fa', 
-            news: '#ffe3e3', 
-            text: '#ffe8cc', 
+            date: '#d0ebff',
+            weather: '#e9ecef',
+            fortune: '#e5dbff',
+            miku: '#c5f6fa',
+            news: '#fcc2d7',
+            text: '#ffe8cc',
+            newstop: '#ffc9c9',
         };
 
         // 定义响应式数据

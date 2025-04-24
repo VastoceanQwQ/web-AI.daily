@@ -151,7 +151,8 @@ export default {
 
                         // 登录成功后3秒自动跳转到主页
                         setTimeout(() => {
-                            this.$router.push('/');
+                            window.location.href = '/';
+                            //this.$router.push('/');
                         }, 3000);
                     } else if (responseData.code === -1) {
                         // 用户名不存在
