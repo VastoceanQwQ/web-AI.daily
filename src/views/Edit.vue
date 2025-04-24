@@ -2,9 +2,11 @@
     <div class="edit-container">
         <div class="left-panel">
             <div class="card">
-                <h2>添加新卡片</h2>
+                <h1 style="font-weight:600;">编辑</h1>
+                <p style="font-size: 12px;color:darkgray;margin-bottom: 20px;">每次改动将自动保存</p>
                 <el-dropdown @command="addCard">
-                    <el-button type="primary">添加卡片</el-button>
+                    <el-button type="primary" style="width: 257px;">添加卡片</el-button>
+
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item command="weather">天气</el-dropdown-item>
@@ -20,28 +22,28 @@
                             <el-dropdown-item command="customAI">自定义AI</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
+
                 </el-dropdown>
+
                 <div class="card-buttons">
-                    <el-button 
-                        v-for="(color, type) in themeColors" 
-                        :key="type" 
-                        @click="addCard(type)"
-                        :style="{ border: `2px dashed ${color}` }"
-                        class="card-button"
-                    >
+                    <el-button style="margin: 0px;" v-for="(color, type) in themeColors" :key="type"
+                        @click="addCard(type)" :style="{ border: `1px dashed ${color}` }" class="card-button">
                         {{ getEmoji(type) }} {{ getChineseType(type) }}
                     </el-button>
                 </div>
+                <br>
                 <div class="time-setting">
                     <el-form label-position="left" label-width="100px">
                         <el-form-item label="生成时间">
-                            <el-time-picker v-model="generateTime" format="HH:mm" placeholder="选择时间"></el-time-picker>
+                            <el-TimeSelect v-model="generateTime" format="HH:mm" placeholder="请选择" start="5:00"
+                                end="11:00" step="00:10"></el-TimeSelect>
                         </el-form-item>
+                        <p style="font-size: 12px;color:darkgray;">
+                            此时间为早报内容开始生成的时间，从开始生成内容到展示内容期间需要约5-10分钟的时间，推荐将时间提前10分钟设定以获得更好的体验</p>
+
                     </el-form>
-                </div>
-                <div class="action-buttons">
-                    <el-button type="primary" @click="saveChanges">保存</el-button>
-                    <el-button @click="discardChanges">放弃更改</el-button>
+                    <p style="font-size: 12px;color: #ff8787; margin-top: 15px;">
+                        注意：请填写所有卡片的必填参数且不要保留没有填写任何参数的卡片，否则生成的内容会出现比较大的偏差和问题！</p>
                 </div>
             </div>
         </div>
@@ -54,16 +56,8 @@
                     <div class="card-actions">
                         <img src="/up.svg" alt="up" @click="moveCardUp(index)" />
                         <img src="/down.svg" alt="down" @click="moveCardDown(index)" />
-                        <el-dropdown @command="handleChangeCardType(index, $event)">
-                            <img src="/change.svg" alt="change" />
-                            <template #dropdown>
-                                <el-dropdown-menu>
-                                    <el-dropdown-item v-for="(color, type) in themeColors" :key="type"
-                                        :command="type">{{ type }}</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </template>
-                        </el-dropdown>
-                        <img src="/delete.svg" alt="delete" @click="deleteCard(index)" />
+
+                        <img src="/delete.svg" alt="delete" @click="deleteCard(index)" style="width: 16px;" />
                     </div>
 
                     <el-form label-position="left" label-width="100px" class="form-right-align">
@@ -81,7 +75,7 @@
                                     :autosize="{ minRows: 2, maxRows: 6 }" placeholder="请用自然语言描述需求" />
                             </el-form-item>
                         </div>
-                        <div v-else-if=" card.type==='newstop'">
+                        <div v-else-if="card.type === 'newstop'">
                             <h2>📰 热点新闻</h2>
                             <el-form-item label=" 生成图片">
                                 <el-switch v-model="card.generateImage" />
@@ -195,7 +189,8 @@
                             <h2>🤖 自定义AI</h2>
                             <el-form-item label="需求">
                                 <el-input type="textarea" v-model="card.requirement"
-                                    :autosize="{ minRows: 2, maxRows: 6 }" placeholder="请用自然语言描述需求" />
+                                    :autosize="{ minRows: 4, maxRows: 6 }"
+                                    placeholder="请用自然语言描述需求，Agent将根据您的需求自动生成内容" />
                             </el-form-item>
                         </div>
                         <div v-else>
@@ -360,30 +355,44 @@ export default {
 <style scoped>
 .edit-container {
     display: flex;
-    width: 1400px;
+    width: 1200px;
     margin: 0 auto;
     padding: 20px;
     color: #000;
-    height: 100vh; /* 设置高度为100% */
+    top: 10%;
+
 }
 
 .left-panel {
-    width: 30%;
+    width: 350px;
     padding: 20px;
-    height: 100%;
-    overflow: hidden; /* 左半部分不可滚动 */
+    height: 100vh;
+    position: fixed;
+    /* 固定定位 */
+    top: 20;
+    /* 固定在顶部 */
+}
+
+.left-panel .card {
+    background: rgba(255, 255, 255, 0.785);
+    box-shadow: 2px 0px 20px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(7.5px);
 }
 
 .right-panel {
     width: 70%;
     padding: 20px;
     height: 100%;
-    overflow-y: auto; /* 右半部分可以滚动 */
+    overflow-y: auto;
+    /* 右半部分可以滚动 */
+    margin-left: 30%;
+    /* 保持与左侧面板的间距 */
 }
 
 .right-panel .card-container {
     column-count: 2;
-    column-gap: 20px; /* 两列间距 */
+    column-gap: 20px;
+    /* 两列间距 */
 }
 
 .left-panel .card {
@@ -396,7 +405,7 @@ export default {
     width: 100%;
 }
 
-.edit-container h2{
+.edit-container h2 {
     font-weight: bold;
     padding-bottom: 15px;
 }
@@ -578,7 +587,7 @@ button:hover {
     cursor: pointer;
     transition: opacity 0.2s;
     opacity: 0.6;
-    
+
 }
 
 .card-actions img:hover {
@@ -593,20 +602,26 @@ button:hover {
 
 /* 修改 textarea 的样式，使文字颜色变淡 */
 .el-textarea__inner {
-    color: #999; /* 设置文字颜色为浅灰色 */
+    color: #999;
+    /* 设置文字颜色为浅灰色 */
 }
 
 /* 确保 textarea 可编辑 */
 .el-textarea__inner:read-only {
-    background-color: #fff; /* 保持背景为白色 */
-    cursor: text; /* 设置光标为文本输入状态 */
+    background-color: #fff;
+    /* 保持背景为白色 */
+    cursor: text;
+    /* 设置光标为文本输入状态 */
 }
 
 .card-buttons {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 两列布局 */
-    gap: 10px;
-    margin-top: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    /* 两列布局 */
+    gap: 8px;
+    margin-top: 10px;
+    padding-left: 0px;
+
 }
 
 .action-buttons {
@@ -616,15 +631,16 @@ button:hover {
 }
 
 .card-button {
-    width: 100%;
+    width: 90%;
     padding: 10px;
     text-align: center;
-    background-color: #fff;
+    background-color: #ffffff00;
     color: #000;
     transition: background-color 0.3s;
 }
 
 .card-button:hover {
-    background-color: #f5f5f5;
+    background-color: #e4f7ff;
+    color: #000;
 }
 </style>
