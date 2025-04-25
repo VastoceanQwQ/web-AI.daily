@@ -296,13 +296,13 @@ export default {
     height: auto;
     margin-bottom: 20px;
     filter: grayscale(30%);
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 .no-cards-text p {
     font-size: 16px;
     color: #636363;
-    opacity: 0.7;
+    opacity: 0.5;
     font-weight: bold;
 }
 

@@ -24,7 +24,8 @@
     "vue-grid-layout": "^2.4.0",
     "vue-markdown-it": "^0.9.4",
     "vue-markdown-renderer": "^0.2.7",
-    "vue-router": "^4.0.13"
+    "vue-router": "^4.0.13",
+    "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

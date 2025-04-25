@@ -24,9 +24,12 @@
                         <span>记住密码</span>
                     </label>
                 </div>
-                <button type="submit" class="btn" :disabled="isLoading || loginSuccess">
-                    {{ isLoading ? '正在登录...' : loginSuccess ? '登录成功' : '登录' }}
-                </button>
+                <el-form-item>
+                    <el-button type="primary" native-type="submit" 
+                        style="width: 200px;" size="large" class="btn" :loading="isLoading" >
+                        {{ isLoading ? '正在登录...' : loginSuccess ? '登录成功' : '登录' }}
+                    </el-button>
+                </el-form-item>
                 <p class="msg">还没有账号？<router-link to="/register">注册</router-link></p>
             </form>
         </div>

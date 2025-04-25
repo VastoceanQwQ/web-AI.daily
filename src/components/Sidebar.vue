@@ -33,9 +33,9 @@
                 <img src="/setting.svg" alt="Setting Icon" class="icon" />
                 <span class="text">设置</span>
             </router-link>
-            <router-link to="/login" class="sidebar-item" v-if="isLoggedIn">
+            <div class="sidebar-item" v-if="isLoggedIn" @click="handleLogout">
                 <span class="text" @click="handleLogout">注销</span>
-            </router-link>
+            </div>
             <div class="sidebar-item" @click="hideSidebar" v-if="isHidden">
                 <img src="/left.svg" alt="Left Icon" class="icon" />
                 <span class="text"></span>
@@ -48,7 +48,7 @@
         <div class="footer-logo" id="footer-logo">
             <div class="logo"><img src="@/assets/img/logo.jpg" /></div>
             <div class="logo-text">
-                
+
             </div>
         </div>
     </div>
@@ -84,12 +84,12 @@ export default {
             eventBus.on('refreshSidebar', refreshSidebar);
         });
 
-        
+
 
         const refreshSidebar = () => {
             console.log('Sidebar refresh event received');
             // 调用forceUpdate方法
-            
+
             proxy.$forceUpdate();
             console.log('99');
             //componentKey.value += 1; // 改变 key 的值，强制重新渲染组件
@@ -113,8 +113,9 @@ export default {
             eraseCookie('username');
             eraseCookie('encryptedPassword');
             eraseCookie('user_id');
+            window.location.href = '/';
         };
-        
+
 
         return {
             isHidden,
@@ -141,7 +142,7 @@ export default {
     background: rgba(255, 255, 255, 0.6);
     box-shadow: 2px 0px 20px rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(7.5px);
-    z-index: 2000;
+    z-index: 3000;
     user-select: none;
     display: flex;
     flex-direction: column;
@@ -219,7 +220,8 @@ export default {
     border-radius: 0.94rem;
     margin: 20px;
 }
-.footer-logo img{
+
+.footer-logo img {
     width: 35px;
     height: 35px;
     border-radius: 0.7rem;
@@ -242,10 +244,11 @@ export default {
     letter-spacing: 0.13rem;
 }
 
-.logo{
-    position:fixed;
+.logo {
+    position: fixed;
 }
-.logo-text{
+
+.logo-text {
     position: fixed;
 }
 
