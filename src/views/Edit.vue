@@ -44,7 +44,8 @@
                     <p style="font-size: 12px;color: #ff8787; margin-top: 15px;">
                         重要提示：请务必填写所有卡片的必填参数，并确保参数准确无误。错误或随意填写参数可能导致内容异常或数据偏差！</p>
                 </div>
-                <el-button style="width: 80px; margin-top: 20px;" @click="showDiscardDialog" plain type="danger">
+                <el-button style="width: 80px; margin-top: 20px;" @click="showDiscardDialog" plain type="danger"
+                    :disabled="loading">
                     放弃更改
                 </el-button>
                 <el-button type="primary" style="width: 162px; margin-top: 20px;" @click="manualSave"
@@ -204,15 +205,12 @@
 
                         <div v-else-if="card.type === 'text'">
                             <h2>🏷️ 自定义文本</h2>
-                            <el-form-item label="卡片标题">
-                                <el-input v-model="card.title" placeholder="选填，留空则不显示标题" />
-                            </el-form-item>
                             <el-form-item label="头图链接">
                                 <el-input placeholder="选填，留空则不展示头图" v-model="card.headerImageLink" />
                             </el-form-item>
                             <el-form-item label="正文内容">
                                 <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }"
-                                    placeholder="必填，可以使用markdown语法填写文本" :class="{ 'required-field': !card.content }" />
+                                    placeholder="必填，可使用markdown语法填写文本。第一行使用 # 为开头则可作为卡片标题" :class="{ 'required-field': !card.content }" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'customAI'">

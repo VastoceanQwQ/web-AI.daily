@@ -1,13 +1,34 @@
 <!-- src/views/Home.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <div class="card-description">开发版界面 · Ver 20250424-001 · 9:15
-            <div>
-                <button @click="clearCards" class="test-button">删除所有卡片</button><span>&nbsp&nbsp&nbsp</span>
-                <button @click="loadSampleData" class="test-button">加载示例数据</button>
+        <div v-if="isLoading" class="loading-state">
+            <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo" style="opacity: 0.6; padding-right: 3px;">
+            <div class=" no-cards-text card-description">
+                <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
             </div>
         </div>
-        <div v-if="cards.length === 0" class="no-cards">
+        <div v-else-if="cards.length === 0 && hasCardsSet" class="no-cards">
+            <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
+            <div class="no-cards-text card-description">
+
+                <p v-if="isBeforeGenerateTime">今日份的卡片还未生成哦</p>
+                <p v-else>卡片已经设置完成, 但到明天才能生成哦</p>
+
+                <p v-if="isBeforeGenerateTime">请等到 {{ generateTime }} 后再查看</p>
+                <p v-else>请等到明日 {{ generateTime }} 后再查看</p>
+
+                <p v-if="isBeforeGenerateTime"></p>
+                <p v-else><br>若当前时间为{{ generateTime }}后的10分钟内，卡片内容可能正在生成，请稍等片刻后再查看</p>
+            </div>
+        </div>
+        <div v-else-if="cards.length === 0 && !isLoggedIn" class="no-cards">
+            <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
+            <div class="no-cards-text card-description">
+                <p>您还未登录哦</p>
+                <p>请点击侧边栏头像区域前往登录</p>
+            </div>
+        </div>
+        <div v-else-if="cards.length === 0 && isLoggedIn" class="no-cards">
             <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
             <div class="no-cards-text card-description">
                 <p>还没有添加卡片哦</p>
@@ -20,7 +41,13 @@
                     :class="{ 'has-header-image': card.headerImage, 'has-theme-color': !card.headerImage && themeColors[card.card_type] }"
                     :style="{ '--theme-color': !card.headerImage ? themeColors[card.card_type] : '' }">
                     <div class="card-header" :style="{ backgroundImage: `url(${card.headerImage || ''})` }"></div>
-                    <div class="card-content" v-html="renderMarkdown(card.content)"></div>
+                    <div class="card-content-container" :style="{ maxHeight: isExpanded[index] ? 'none' : '300px', overflow: 'hidden' }">
+                        <div class="card-content" v-html="renderMarkdown(card.content)"></div>
+                    </div>
+                    <button v-if="card.content.length > 200" class="expand-button" @click="toggleExpand(index)">
+                        <img v-if="isExpanded[index]" src="/public/up.svg" alt="收起" class="icon1" />
+                        <img v-else src="/public/down.svg" alt="展开" class="icon1" />
+                    </button>
                 </div>
             </transition-group>
             <div class="upper-main"></div>
@@ -30,11 +57,12 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import MarkdownIt from 'markdown-it';
-import FixedButtons from '../components/FixedButtons.vue'; // 确保路径正确
+import FixedButtons from '../components/FixedButtons.vue';
 import scrollReveal from 'scrollreveal';
-import { sampleCards } from '../sampleCards'; // 导入示例数据
+import axios from 'axios';
+import { getCookie } from '@/utils/cookieUtils';
 
 const md = new MarkdownIt();
 
@@ -43,33 +71,181 @@ export default {
         FixedButtons,
     },
     setup() {
-        // 定义每种卡片类型的主题色
+        const sr = ref(null);
         const themeColors = {
-            date: '#d0ebff',
-            weather: '#e9ecef',
+            weather: '#fff3bf',
             fortune: '#e5dbff',
-            miku: '#c5f6fa',
             news: '#fcc2d7',
             text: '#ffe8cc',
             newstop: '#ffc9c9',
+            health: '#d3f9d8',
+            music: '#ffd8a8',
+            traffic: '#a5d8ff',
+            economy: '#ffdeeb',
+            calendar: '#d0ebff',
+            customAI: '#ced4da'
         };
 
-        // 定义响应式数据
         const cards = ref([]);
+        const isExpanded = ref([]); // 新增：控制卡片展开/折叠状态
+        const isLoading = ref(true);
+        const hasCardsSet = ref(false);
+        const generateTime = ref('');
+        const isBeforeGenerateTime = ref(true);
+        const isWithin10MinutesAfterGenerateTime = ref(false);
+        const isLoggedIn = ref(false);
 
-        // 定义方法
+        // 新增：初始化 isExpanded 状态
+        const initExpandedState = () => {
+            isExpanded.value = cards.value.map(() => false);
+        };
+
+        // 新增：切换卡片展开/折叠状态
+        const toggleExpand = (index) => {
+            isExpanded.value[index] = !isExpanded.value[index];
+        };
+
         const renderMarkdown = (content) => {
             return md.render(content);
         };
 
-        // 设置scrollReveal的方法
+        // 新增：获取生成时间
+        const fetchGenerateTime = async () => {
+            try {
+                const response = await axios.post(
+                    `https://api.coze.cn/v1/workflow/run`,
+                    {
+                        workflow_id: '7494504516701274162',
+                        parameters: {
+                            user_id: getCookie('user_id'),
+                            time: "0 0 0 * * *"
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+                const responseData = JSON.parse(response.data.data);
+                if (responseData.code === 3) {
+                    const parts = responseData.time.split(' ');
+                    const minute = parts[1].padStart(2, '0');
+                    const hour = parts[2].padStart(2, '0');
+                    generateTime.value = `${hour}:${minute}`;
+
+                    const now = new Date();
+                    var generateDate1 = new Date();
+                    var generateDate = new Date();
+                    generateDate.setHours(hour, minute, 0, 0);
+                    isWithin10MinutesAfterGenerateTime.value = now >= generateDate && now <= new Date(generateDate.getTime() + 10 * 60 * 1000);
+                    isBeforeGenerateTime.value = now < generateDate;
+                    
+                }
+            } catch (error) {
+                console.error('Error fetching generate time:', error);
+            }
+        };
+
+        // 新增：检查是否有卡片设置
+        const checkCardsSet = async () => {
+            const user_id = getCookie('user_id');
+            if (!user_id) {
+                console.error('User ID not found in cookies');
+                isLoggedIn.value = false;
+                return;
+            }
+            isLoggedIn.value = true;
+
+            try {
+                const response = await axios.post(
+                    `https://api.coze.cn/v1/workflow/run`,
+                    {
+                        workflow_id: '7496712396578783282',
+                        parameters: {
+                            user_id: user_id
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+                const responseData = JSON.parse(response.data.data);
+                hasCardsSet.value = responseData.code === 1 && responseData.cards.length > 0;
+            } catch (error) {
+                console.error('Error checking cards set:', error);
+            }
+        };
+
+        const fetchCards = async () => {
+            const user_id = getCookie('user_id');
+            if (!user_id) {
+                console.error('User ID not found in cookies');
+                isLoading.value = false;
+                return;
+            }
+
+            try {
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+
+                const formattedTime = `${todayStart.getFullYear()}-${String(todayStart.getMonth() + 1).padStart(2, '0')}-${String(todayStart.getDate()).padStart(2, '0')} 00:00:00`;
+
+                const response = await axios.post(
+                    `https://api.coze.cn/v1/workflow/run`,
+                    {
+                        workflow_id: '7496415888914087988',
+                        parameters: {
+                            user_id: user_id,
+                            time: formattedTime
+                        }
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                        }
+                    }
+                );
+
+                const responseData = JSON.parse(response.data.data);
+
+                if (responseData.code === 1) {
+                    cards.value = responseData.output.map(card => {
+                        return {
+                            card_type: card.card_type || '',
+                            content: card.card_content || '',
+                            headerImage: card.card_top_img || ''
+                        };
+                    });
+                    initExpandedState(); // 初始化 isExpanded 状态
+                } else {
+                    console.error('Failed to fetch cards:', responseData.msg);
+                }
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+            } finally {
+                isLoading.value = false;
+                nextTick(() => {
+                    retScroll();
+                });
+            }
+        };
+
         const retScroll = () => {
-            const sr = scrollReveal();
-            sr.reveal('.card', {
+            if (sr.value) {
+                sr.value.destroy();
+            }
+            sr.value = scrollReveal();
+            sr.value.reveal('.card', {
                 duration: 500,
                 delay: 100,
                 origin: 'bottom',
-                reset: true, // 设置为true，以便在滚动回顶部时重新应用动画
+                reset: true,
                 mobile: true,
                 distance: '10px',
                 opacity: 0.001,
@@ -79,11 +255,11 @@ export default {
                     console.log('Card revealed');
                 },
             });
-            sr.reveal('#buttons', {
+            sr.value.reveal('#buttons', {
                 duration: 500,
                 delay: 100,
                 origin: 'bottom',
-                reset: false, 
+                reset: false,
                 mobile: true,
                 distance: '0px',
                 opacity: 0.001,
@@ -95,34 +271,31 @@ export default {
             });
         };
 
-        // 页面加载生命周期
-        onMounted(() => {
-            retScroll(); // 初始化 scrollReveal 动画
+        onMounted(async () => {
+            await checkCardsSet();
+            await fetchGenerateTime();
+            await fetchCards();
+            retScroll();
         });
 
         const mainPlace = ref(null);
 
-        // 清空卡片的方法
         const clearCards = () => {
             cards.value = [];
         };
 
-        // 加载示例数据的方法
-        const loadSampleData = () => {
-            cards.value = sampleCards;
-            // 重新初始化 scrollReveal
-            retScroll();
-            // 同步新的 .card 元素
-            scrollReveal().sync();
-        };
-
         return {
             cards,
+            isExpanded,
+            toggleExpand,
             renderMarkdown,
             mainPlace,
             clearCards,
-            themeColors, // 确保 themeColors 可以在模板中使用
-            loadSampleData, // 提供加载示例数据的方法
+            themeColors,
+            isLoading,
+            hasCardsSet,
+            generateTime,
+            isBeforeGenerateTime
         };
     },
 };
@@ -139,7 +312,7 @@ export default {
     left: 0;
     right: 0;
     margin: auto;
-    z-index: 1; /* 确保 main-place 在其他元素之上 */
+    z-index: 1;
 }
 
 .card-container {
@@ -163,7 +336,8 @@ export default {
 }
 
 .card.has-header-image .card-header {
-    height: 200px; /* 设置头图的高度 */
+    height: 200px;
+    /* 设置头图的高度 */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -192,7 +366,8 @@ export default {
     top: 0;
     left: 0;
     right: 0;
-    height: 50px; /* 渐淡主题色的高度 */
+    height: 50px;
+    /* 渐淡主题色的高度 */
     background: linear-gradient(to bottom, var(--theme-color), rgba(255, 255, 255, 0));
     z-index: 1;
 }
@@ -235,6 +410,21 @@ export default {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+}
+
+.card-content p {
+    margin-bottom: 0.5em;
+}
+
+/* 改善列表样式 */
+.card-content ul,
+.card-content ol {
+    padding-left: 1.5em;
+    margin: 1em 0;
+}
+
+.card-content li {
+    margin: 0.4em 0;
 }
 
 .card-content th {
@@ -292,7 +482,8 @@ export default {
 }
 
 .no-cards-image {
-    width: 150px; /* 根据需要调整图片大小 */
+    width: 150px;
+    /* 根据需要调整图片大小 */
     height: auto;
     margin-bottom: 20px;
     filter: grayscale(30%);
@@ -304,6 +495,24 @@ export default {
     color: #636363;
     opacity: 0.5;
     font-weight: bold;
+}
+
+/* 修改：加载状态样式 */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 18px;
+    color: #636363;
+}
+
+.loading-logo {
+    width: 100px;
+    /* 根据需要调整图片大小 */
+    height: auto;
+    margin-bottom: 20px;
 }
 
 /* 添加过渡效果的 CSS 类 */
@@ -324,7 +533,30 @@ export default {
     filter: brightness(3) invert(1);
 }
 
-.upper-main{
+.upper-main {
     height: 50px;
+}
+
+.card-content-container {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    will-change: max-height;
+}
+
+.expand-button {
+    display: block;
+    width: 100%;
+    padding-top: -10px;
+    padding: 3px;
+    border: none;
+    background-color: #f0f0f000;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.expand-button:hover {
+    background-color: #e0e0e031;
 }
 </style>
