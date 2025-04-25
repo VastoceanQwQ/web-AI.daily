@@ -1,37 +1,33 @@
-<!-- src/components/Register.vue -->
 <template>
-    <div class="login" ref="registerCard">
+    <div class="login" ref="loginCard">
         <div class="image">
-            <img src="@/assets/img/img002.jpg" alt="Register Image" />
+            <img src="@/assets/img/img001.jpg" alt="Login Image" />
         </div>
         <div class="loginform">
-            <h2>注册</h2>
-            <form @submit.prevent="handleRegister">
+            <h2>登录</h2>
+            <form @submit.prevent="handleLogin">
                 <div class="form-group">
                     <label for="username">用户名</label>
-                    <input type="text" id="username" v-model="user_name" required placeholder="3-15字 汉字字母数字下划线"
-                        :class="{ 'is-invalid': errors.user_name, 'is-valid': !errors.user_name && user_name && isSubmitted }"
-                        @blur="resetValidation('user_name')" />
+                    <input type="text" id="username" v-model="username" required
+                        :class="{ 'is-invalid': errors.username, 'is-valid': !errors.username && username && isSubmitted }"
+                        @blur="resetValidation('username')" />
                 </div>
                 <div class="form-group">
                     <label for="password">密码</label>
-                    <input type="password" id="password" v-model="user_password" required placeholder="6-20位 必须含有字母与数字"
-                        :class="{ 'is-invalid': errors.user_password, 'is-valid': !errors.user_password && user_password && isSubmitted }"
-                        @blur="resetValidation('user_password')" />
+                    <input type="password" id="password" v-model="password" required
+                        :class="{ 'is-invalid': errors.password, 'is-valid': !errors.password && password && isSubmitted }"
+                        @blur="resetValidation('password')" />
                 </div>
-                <div class="form-group">
-                    <label for="password-again">再次输入密码</label>
-                    <input type="password" id="password-again" v-model="passwordAgain" required placeholder="两次需一致"
-                        :class="{ 'is-invalid': errors.passwordAgain, 'is-valid': !errors.passwordAgain && passwordAgain && isSubmitted }"
-                        @blur="resetValidation('passwordAgain')" />
+                <div class="form-group remember-password">
+                    <label for="remember">
+                        <input type="checkbox" id="remember" v-model="remember" />
+                        <span>记住密码</span>
+                    </label>
                 </div>
-                <el-form-item>
-                    <el-button type="primary" native-type="submit" style="width: 200px;" size="large" class="btn"
-                        :loading="isLoading">
-                        {{ isLoading ? '正在注册...' : registerSuccess ? '注册成功' : '注册' }}
-                    </el-button>
-                </el-form-item>
-                <p class="msg">已有账号？<router-link to="/login">登录</router-link></p>
+                <button type="submit" class="btn" :disabled="isLoading || loginSuccess">
+                    {{ isLoading ? '正在登录...' : loginSuccess ? '登录成功' : '登录' }}
+                </button>
+                <p class="msg">还没有账号？<router-link to="/register">注册</router-link></p>
             </form>
         </div>
         <Alert ref="alertComponent" />
@@ -43,6 +39,8 @@ import scrollReveal from 'scrollreveal';
 import Alert from './Alert.vue';
 import axios from 'axios';
 import CryptoJS from 'crypto-js'; // 导入 crypto-js
+import { setCookie } from '@/utils/cookieUtils'; // 假设有一个 cookieUtils 文件
+import eventBus from '@/eventBus';
 
 export default {
     components: {
@@ -50,71 +48,62 @@ export default {
     },
     data() {
         return {
-            user_name: '',
-            user_password: '',
-            passwordAgain: '',
-            code: 0,
+            username: '',
+            password: '',
             errors: {},
             isSubmitted: false, // 新增一个标志位，表示是否已提交
-            api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
-            workflow_id: '7495766150467895306',
             isLoading: false, // 新增一个标志位，表示是否正在加载
-            registerSuccess: false, // 新增一个标志位，表示是否注册成功
+            loginSuccess: false, // 新增一个标志位，表示是否登录成功
+            api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
+            workflow_id: '7495595869320871976',
+            remember: false, // 新增一个标志位，表示是否记住密码
         };
     },
     mounted() {
         this.initScrollReveal();
     },
     methods: {
-        async handleRegister() {
+        async handleLogin() {
             this.errors = {};
             this.isSubmitted = true; // 设置为已提交
             this.isLoading = true; // 设置为正在加载
-            this.registerSuccess = false; // 重置注册成功状态
+            this.loginSuccess = false; // 重置登录成功状态
             let isValid = true;
             let errorMessages = [];
 
             // 验证用户名
             const usernameRegex = /^[a-zA-Z0-9\u4e00-\u9fa5_]{3,15}$/;
-            if (!usernameRegex.test(this.user_name)) {
+            if (!usernameRegex.test(this.username)) {
                 errorMessages.push('用户名3-15字，只能包含大小写字母、汉字、数字和下划线');
-                this.errors.user_name = true;
+                this.errors.username = true;
                 isValid = false;
             } else {
-                this.errors.user_name = false;
+                this.errors.username = false;
             }
 
             // 验证密码
             const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_]{6,20}$/;
-            if (!passwordRegex.test(this.user_password)) {
+            if (!passwordRegex.test(this.password)) {
                 errorMessages.push('密码6-20位，必须含有字母与数字，只能包含大小写字母、数字和下划线');
-                this.errors.user_password = true;
+                this.errors.password = true;
                 isValid = false;
             } else {
-                this.errors.user_password = false;
-            }
-
-            // 验证两次密码是否一致
-            if (this.user_password !== this.passwordAgain) {
-                errorMessages.push('两次输入的密码不一致');
-                this.errors.passwordAgain = true;
-                isValid = false;
-            } else {
-                this.errors.passwordAgain = false;
+                this.errors.password = false;
             }
 
             if (isValid) {
                 try {
                     // 对密码进行 MD5 加密
-                    const encryptedPassword = CryptoJS.MD5(this.user_password).toString();
+                    const encryptedPassword = CryptoJS.MD5(this.password).toString();
 
+                    // 实现具体的 API 请求逻辑
                     const response = await axios.post(
                         `https://api.coze.cn/v1/workflow/run`,
                         {
                             workflow_id: this.workflow_id,
                             parameters: {
-                                name: this.user_name,
-                                password: encryptedPassword
+                                user_name: this.username,
+                                user_password: encryptedPassword
                             }
                         },
                         {
@@ -132,31 +121,57 @@ export default {
                     } catch (parseError) {
                         console.error('解析 JSON 字符串失败:', parseError);
                         this.$refs.alertComponent.showAlert('解析响应数据失败，请重试', 'error');
+                        this.isLoading = false; // 请求完成后设置为未加载
                         return;
                     }
 
                     console.log('Parsed API Response:', responseData);
 
                     if (responseData.code === 1) {
-                        this.$refs.alertComponent.showAlert('注册成功，3秒后将跳转到登录页', 'success');
+                        // 登录成功
+                        this.$refs.alertComponent.showAlert('登录成功，3秒后将跳转到主页', 'success');
 
-                        // 设置注册成功状态
-                        this.registerSuccess = true;
+                        // 根据“记住密码”状态设置 Cookie 过期时间
+                        const days = this.remember ? 14 : null;
 
-                        // 注册成功后3秒自动跳转到登录页面
+                        // 存储登录信息到 Cookie 中
+                        setCookie('username', this.username, days);
+                        setCookie('encryptedPassword', encryptedPassword, days);
+                        setCookie('user_id', responseData.user_id.toString(), days);
+
+                        // 更新侧边栏的状态
+                        this.updateSidebar(this.username, responseData.user_id);
+
+                        // 设置登录成功状态
+                        this.loginSuccess = true;
+
+                        // 触发刷新事件
+                        eventBus.emit('refreshSidebar');
+                        console.log('refreshSidebar event emitted');
+
+                        // 登录成功后3秒自动跳转到主页
                         setTimeout(() => {
-                            this.$router.push('/login');
+                            window.location.href = '/';
+                            //this.$router.push('/');
                         }, 3000);
-                    } else if (responseData.code === 0) {
-                        this.$refs.alertComponent.showAlert('用户名已存在', 'error');
-                        this.errors.user_name = true; // 将用户名输入框标红
+                    } else if (responseData.code === -1) {
+                        // 用户名不存在
+                        this.$refs.alertComponent.showAlert('用户名不存在', 'error');
+                        this.errors.username = true;
+                        this.errors.password = false;
+                    } else if (responseData.code === -2) {
+                        // 密码错误
+                        this.$refs.alertComponent.showAlert('密码错误', 'error');
+                        this.errors.username = false;
+                        this.errors.password = true;
                     } else {
-                        this.$refs.alertComponent.showAlert(responseData.msg || '注册失败', 'error');
+                        // 未知登录错误
+                        this.$refs.alertComponent.showAlert('未知登录错误', 'error');
                     }
 
                 } catch (error) {
-                    console.error('注册失败:', error);
-                    let errorMsg = '注册失败，请重试';
+                    console.error('登录失败:', error);
+                    let errorMsg = '登录失败，请重试';
 
                     if (error.response) {
                         console.error('API 错误响应:', error.response.data);
@@ -180,7 +195,7 @@ export default {
         },
         initScrollReveal() {
             const sr = scrollReveal();
-            sr.reveal(this.$refs.registerCard, {
+            sr.reveal(this.$refs.loginCard, {
                 duration: 500,
                 delay: 100,
                 origin: 'bottom',
@@ -191,7 +206,7 @@ export default {
                 easing: 'cubic-bezier(0.5, 0, 0, 1)',
                 scale: 0.9,
                 beforeReveal: function (ele) {
-                    console.log('Register card revealed');
+                    console.log('Login card revealed');
                 },
             });
         },
@@ -199,6 +214,10 @@ export default {
             if (!this.isSubmitted) {
                 this.errors[fieldName] = false; // 重置错误状态
             }
+        },
+        updateSidebar(username, user_id) {
+            // 这里不需要更新 sidebar 实例，因为 sidebar 实例不在 Login.vue 中
+            // 只需要触发事件即可
         },
     },
 };
@@ -278,17 +297,18 @@ export default {
 .login .loginform h2 {
     font-weight: bold;
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 20px;
     font-size: 24px;
     color: #666;
 }
 
 .login .loginform .form-group {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    /* 减小间距 */
     width: 100%;
 }
 
-.login .loginform label {
+.login .loginform .form-group label {
     display: block;
     margin-bottom: 5px;
     color: #666;
@@ -325,7 +345,6 @@ export default {
     /* 验证失败时外框为红色 */
     background-image: linear-gradient(0deg, #fff3f3cb 0%, #ffe5e5 100%);
     /* 验证失败时底色为红色 */
-    backdrop-filter: blur(7.5px);
 }
 
 .login .loginform input.is-valid {
@@ -333,7 +352,6 @@ export default {
     /* 验证通过时外框为绿色 */
     background-image: linear-gradient(0deg, #f4fff6 0%, #e7ffeb 100%);
     /* 验证通过时底色为绿色 */
-    backdrop-filter: blur(7.5px);
 }
 
 .login .loginform .btn {
@@ -346,7 +364,6 @@ export default {
     transition: 0.2s;
     cursor: pointer;
     font-size: 14px;
-    margin-bottom: -10px;
 }
 
 .login .loginform .btn:hover {
@@ -371,9 +388,12 @@ export default {
 
 .login .loginform .msg {
     text-align: center;
-    line-height: 48px;
+    line-height: 30px;
+    /* 减小间距 */
     font-size: 13px;
     color: #666;
+    margin-top: 10px;
+    /* 减小间距 */
 }
 
 .login a {
@@ -392,5 +412,31 @@ export default {
     background-clip: text;
     color: transparent;
     background-color: #ffffff00;
+}
+
+.login .loginform .form-group label {
+    display: flex;
+    align-items: center;
+}
+
+.login .loginform .form-group input[type="checkbox"] {
+    margin-left: -85px;
+    margin-top: 2.5px;
+    margin-right: 0px;
+    /* 减小间距 */
+    accent-color: #007bff;
+    /* 设置复选框选中时的颜色 */
+}
+
+.login .loginform .form-group span {
+    margin-left: -80px;
+    /* 移除左边距 */
+    font-size: 13px;
+    color: #666;
+}
+
+.login .loginform .remember-password {
+    margin-bottom: 15px;
+    /* 减小间距 */
 }
 </style>

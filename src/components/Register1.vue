@@ -25,12 +25,10 @@
                         :class="{ 'is-invalid': errors.passwordAgain, 'is-valid': !errors.passwordAgain && passwordAgain && isSubmitted }"
                         @blur="resetValidation('passwordAgain')" />
                 </div>
-                <el-form-item>
-                    <el-button type="primary" native-type="submit" style="width: 200px;" size="large" class="btn"
-                        :loading="isLoading">
-                        {{ isLoading ? '正在注册...' : registerSuccess ? '注册成功' : '注册' }}
-                    </el-button>
-                </el-form-item>
+                <button type="submit" class="btn" :disabled="isLoading || registerSuccess"
+                    :class="{ 'loading': isLoading, 'success': registerSuccess }">
+                    {{ isLoading ? '正在注册...' : registerSuccess ? '注册成功' : '注册' }}
+                </button>
                 <p class="msg">已有账号？<router-link to="/login">登录</router-link></p>
             </form>
         </div>
@@ -346,7 +344,6 @@ export default {
     transition: 0.2s;
     cursor: pointer;
     font-size: 14px;
-    margin-bottom: -10px;
 }
 
 .login .loginform .btn:hover {
