@@ -1,7 +1,6 @@
 <!-- src/views/History.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <!-- 时间选择器 -->
         <div style="margin-bottom: 20px;">
             <label for="date-selector">选择日期：</label>
             <input type="date" id="date-selector" v-model="selectedDate" @change="fetchCardsByDate">
@@ -41,7 +40,6 @@
                         <img v-else src="/public/down.svg" alt="展开" class="icon1" />
                     </button>
                 </div>
-                <!-- 新增声明卡片 -->
                 <div v-if="cards.length > 0" class="card" :key="'footer'" style="text-align: center; font-size: 14px; color: #999;">
                     <div class="card-content">
                         <p>本站部分文本由AI生成，请注意甄别。</p>
@@ -104,7 +102,7 @@ export default {
 
         // 根据日期获取卡片数据
         const fetchCardsByDate = async () => {
-            const user_id = getCookie('user_id') || 'fc08b2f5-dbe8-4aaa-a842-417e5238ee87'; // 示例用户 ID
+            const user_id = getCookie('user_id') || 'fc08b2f5-dbe8-4aaa-a842-417e5238ee87'; 
             try {
                 const startDate = new Date(selectedDate.value);
                 const endDate = new Date(startDate);
@@ -247,7 +245,6 @@ export default {
 
 .card.has-header-image .card-header {
     height: 200px;
-    /* 设置头图的高度 */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -277,7 +274,6 @@ export default {
     left: 0;
     right: 0;
     height: 50px;
-    /* 渐淡主题色的高度 */
     background: linear-gradient(to bottom, var(--theme-color), rgba(255, 255, 255, 0));
     z-index: 1;
 }
@@ -326,7 +322,6 @@ export default {
     margin-bottom: 0.5em;
 }
 
-/* 改善列表样式 */
 .card-content ul,
 .card-content ol {
     padding-left: 1.5em;
@@ -393,7 +388,6 @@ export default {
 
 .no-cards-image {
     width: 150px;
-    /* 根据需要调整图片大小 */
     height: auto;
     margin-bottom: 20px;
     filter: grayscale(30%);
@@ -407,7 +401,6 @@ export default {
     font-weight: bold;
 }
 
-/* 修改：加载状态样式 */
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -420,12 +413,10 @@ export default {
 
 .loading-logo {
     width: 100px;
-    /* 根据需要调整图片大小 */
     height: auto;
     margin-bottom: 20px;
 }
 
-/* 添加过渡效果的 CSS 类 */
 .card-list-enter-active,
 .card-list-leave-active {
     transition: opacity 0.5s ease;

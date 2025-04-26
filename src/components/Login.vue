@@ -41,8 +41,8 @@
 import scrollReveal from 'scrollreveal';
 import Alert from './Alert.vue';
 import axios from 'axios';
-import CryptoJS from 'crypto-js'; // 导入 crypto-js
-import { setCookie } from '@/utils/cookieUtils'; // 假设有一个 cookieUtils 文件
+import CryptoJS from 'crypto-js'; 
+import { setCookie } from '@/utils/cookieUtils'; 
 import eventBus from '@/eventBus';
 
 export default {
@@ -54,12 +54,12 @@ export default {
             username: '',
             password: '',
             errors: {},
-            isSubmitted: false, // 新增一个标志位，表示是否已提交
-            isLoading: false, // 新增一个标志位，表示是否正在加载
-            loginSuccess: false, // 新增一个标志位，表示是否登录成功
+            isSubmitted: false, 
+            isLoading: false, 
+            loginSuccess: false, 
             api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
             workflow_id: '7495595869320871976',
-            remember: false, // 新增一个标志位，表示是否记住密码
+            remember: false, 
         };
     },
     mounted() {
@@ -68,9 +68,9 @@ export default {
     methods: {
         async handleLogin() {
             this.errors = {};
-            this.isSubmitted = true; // 设置为已提交
-            this.isLoading = true; // 设置为正在加载
-            this.loginSuccess = false; // 重置登录成功状态
+            this.isSubmitted = true; 
+            this.isLoading = true; 
+            this.loginSuccess = false; 
             let isValid = true;
             let errorMessages = [];
 
@@ -98,8 +98,7 @@ export default {
                 try {
                     // 对密码进行 MD5 加密
                     const encryptedPassword = CryptoJS.MD5(this.password).toString();
-
-                    // 实现具体的 API 请求逻辑
+                    
                     const response = await axios.post(
                         `https://api.coze.cn/v1/workflow/run`,
                         {
@@ -124,8 +123,7 @@ export default {
                     } catch (parseError) {
                         console.error('解析 JSON 字符串失败:', parseError);
                         this.$refs.alertComponent.showAlert('解析响应数据失败，请重试', 'error');
-                        this.isLoading = false; // 请求完成后设置为未加载
-                        return;
+                        this.isLoading = false; 
                     }
 
                     console.log('Parsed API Response:', responseData);
@@ -143,13 +141,10 @@ export default {
                         setCookie('user_id', responseData.user_id.toString(), days);
                         setCookie('avatar', responseData.img, days);
 
-                        // 更新侧边栏的状态
+                        
                         this.updateSidebar(this.username, responseData.user_id);
-
-                        // 设置登录成功状态
                         this.loginSuccess = true;
-
-                        // 触发刷新事件
+                       
                         eventBus.emit('refreshSidebar');
                         console.log('refreshSidebar event emitted');
 
@@ -189,12 +184,12 @@ export default {
 
                     this.$refs.alertComponent.showAlert(errorMsg, 'error');
                 } finally {
-                    this.isLoading = false; // 请求完成后设置为未加载
+                    this.isLoading = false; 
                 }
             } else {
                 const combinedErrors = errorMessages.join('\n');
                 this.$refs.alertComponent.showAlert(combinedErrors, 'error');
-                this.isLoading = false; // 验证失败时设置为未加载
+                this.isLoading = false; 
             }
         },
         initScrollReveal() {
@@ -216,12 +211,11 @@ export default {
         },
         resetValidation(fieldName) {
             if (!this.isSubmitted) {
-                this.errors[fieldName] = false; // 重置错误状态
+                this.errors[fieldName] = false; 
             }
         },
         updateSidebar(username, user_id) {
-            // 这里不需要更新 sidebar 实例，因为 sidebar 实例不在 Login.vue 中
-            // 只需要触发事件即可
+            
         },
     },
 };
@@ -246,7 +240,7 @@ export default {
 }
 
 .login .image {
-    position: absolute; /* 绝对定位 */
+    position: absolute; 
     top: 0;
     left: 0;
     width: 100%;
@@ -254,14 +248,14 @@ export default {
     background-color: #00000000;
     border-radius: 12px;
     overflow: hidden;
-    z-index: 1; /* 确保图片在表单下方 */
+    z-index: 1; 
 }
 
 .login .image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* 使图片填充整个容器 */
+    
 }
 
 .login .image::before {
@@ -277,7 +271,7 @@ export default {
 }
 
 .login .loginform {
-    position: absolute; /* 绝对定位 */
+    position: absolute; 
     top: 0;
     right: 0;
     width: 38%;
@@ -287,10 +281,10 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0.85); /* 调整背景颜色以确保表单可见 */
+    background-color: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(20px);
     border-radius: 0 12px 12px 0;
-    z-index: 2; /* 确保表单在图片上方 */
+    z-index: 2; 
 }
 
 .login .loginform h2 {
@@ -303,7 +297,6 @@ export default {
 
 .login .loginform .form-group {
     margin-bottom: 10px;
-    /* 减小间距 */
     width: 100%;
 }
 
@@ -326,31 +319,23 @@ export default {
 
 .login .loginform input::placeholder {
     color: #999;
-    /* 提示文字颜色变灰 */
     opacity: 1;
-    /* Firefox */
 }
 
 .login .loginform input:focus {
     border-color: #007bff !important;
-    /* 选中时外框为蓝色 */
     background-color: #fff !important;
-    /* 选中时底色为白色 */
     outline: none;
 }
 
 .login .loginform input.is-invalid {
     border-color: #dc3545;
-    /* 验证失败时外框为红色 */
     background-image: linear-gradient(0deg, #fff3f3cb 0%, #ffe5e5 100%);
-    /* 验证失败时底色为红色 */
 }
 
 .login .loginform input.is-valid {
     border-color: #28a745;
-    /* 验证通过时外框为绿色 */
     background-image: linear-gradient(0deg, #f4fff6 0%, #e7ffeb 100%);
-    /* 验证通过时底色为绿色 */
 }
 
 .login .loginform .btn {
@@ -388,11 +373,9 @@ export default {
 .login .loginform .msg {
     text-align: center;
     line-height: 30px;
-    /* 减小间距 */
     font-size: 13px;
     color: #666;
     margin-top: 10px;
-    /* 减小间距 */
 }
 
 .login a {
@@ -422,20 +405,16 @@ export default {
     margin-left: -85px;
     margin-top: 2.5px;
     margin-right: 0px;
-    /* 减小间距 */
     accent-color: #007bff;
-    /* 设置复选框选中时的颜色 */
 }
 
 .login .loginform .form-group span {
     margin-left: -80px;
-    /* 移除左边距 */
     font-size: 13px;
     color: #666;
 }
 
 .login .loginform .remember-password {
     margin-bottom: 15px;
-    /* 减小间距 */
 }
 </style>

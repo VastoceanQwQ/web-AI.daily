@@ -4,7 +4,6 @@
             <button v-show="showScrollToTopButton" class="button" @click="scrollToTop"><img src="/to-top.svg"
                     alt="To-top Icon" class="icon" /></button>
         </transition>
-        <!-- 条件判断：只有当 filteredCards 不为空时才显示定位卡片按钮 -->
         <button v-if="filteredCards.length > 0" class="button" @click="toggleMenu">
             <img src="/map.svg" alt="Map Icon" class="icon" />
         </button>
@@ -67,7 +66,7 @@ export default {
         };
 
         const handleScroll = () => {
-            showScrollToTopButton.value = window.scrollY > 300; // 当滚动超过300px时显示按钮
+            showScrollToTopButton.value = window.scrollY > 300; 
         };
 
         const getFirstEmoji = (content) => {
@@ -85,7 +84,7 @@ export default {
             updatePosition();
             window.addEventListener('resize', updatePosition);
             window.addEventListener('scroll', handleScroll);
-            handleScroll(); // 初始化时检查滚动位置
+            handleScroll(); 
         });
 
         watch(
@@ -111,13 +110,13 @@ export default {
 
 <style scoped>
 .fixed-buttons {
-    position: fixed; /* 改为固定定位 */
+    position: fixed; 
     bottom: 20px;
-    right: 20px; /* 调整为相对于浏览器窗口的右下角 */
+    right: 20px; 
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    /* 确保按钮在最上层 */
+   
 }
 
 .button {
@@ -127,7 +126,7 @@ export default {
     background-image: linear-gradient(0deg, #eedde0 0%, #d7e6fc 95%, #d3e2f8 100%);
     color: rgb(0, 0, 0);
     border: 2px solid #ffffff;
-    /* 添加外边框 */
+    
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -137,7 +136,7 @@ export default {
     break-inside: avoid;
     margin-bottom: 20px;
     opacity: 1;
-    /* 默认完全不透明 */
+    
 }
 
 .button.fade-enter-active,
@@ -148,61 +147,44 @@ export default {
 .button.fade-enter-from,
 .button.fade-leave-to {
     opacity: 0;
-    /* 完全透明 */
+   
 }
 
 .button:hover {
     background-image: linear-gradient(0deg, #f4d5da 0%, #c3d8f7 99%, #b6d2f8 100%);
     border-color: #0199ff;
-    /* 改变hover状态下的边框颜色 */
+    
 }
 
 .dropdown-menu {
     position: absolute;
     width: 58px;
-    /* 与按钮宽度相同 */
     bottom: 80px;
-    /* 调整为在按钮上方 */
     left: -5px;
-    /* 与按钮对齐 */
     background-color: rgba(255, 255, 255, 0.6);
-    /* 白色背景 */
     border: 2px solid rgba(137, 137, 137, 0.6);
-    /* 无边框 */
     box-shadow: none;
-    /* 无阴影 */
     max-height: 300px;
-    /* 设置最大高度 */
     overflow-y: auto;
-    /* 允许滚动 */
     z-index: 1001;
-    /* 确保在按钮之上 */
     padding: 2px;
-    /* 去除内边距 */
     border-radius: 12px;
-    /* 与按钮圆角相同 */
     background: rgba(255, 255, 255, 0.6);
-    /* 半透明背景 */
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(7.5px);
-    /* 毛玻璃效果 */
 }
 
 .dropdown-menu::-webkit-scrollbar {
     display: none;
-    /* 隐藏滚动条 */
 }
 
 .dropdown-item {
     width: 100%;
     height: 50px;
-    /* 与按钮高度相同 */
     border-radius: 12px;
-    /* 与按钮圆角相同 */
     background-image: linear-gradient(0deg, #e2e2e2 0%, #d1d1d1 99%, #ababab 100%);
     color: rgb(0, 0, 0);
     border: 2px solid #ffffff;
-    /* 添加外边框 */
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -210,20 +192,15 @@ export default {
     transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
 
     margin-bottom: 10px;
-    /* 与按钮间距相同 */
     opacity: 1;
-    /* 默认完全不透明 */
     font-size: 24px;
-    /* 增加文字大小 */
 }
 
 .dropdown-item:hover {
     background-image: linear-gradient(0deg, #eeeeee 0%, #dfdfdf 99%, #a7a7a7 100%);
     border-color: #909090;
-    /* 改变hover状态下的边框颜色 */
 }
 
-/* 定义淡入淡出过渡效果 */
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.3s ease;
@@ -232,13 +209,12 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-    /* 完全透明 */
 }
 
 .icon {
     width: 75%;
     height: 75%;
     filter: brightness(2.5) invert(1);
-    object-fit: contain; /* 保持图标比例 */
+    object-fit: contain; 
 }
 </style>

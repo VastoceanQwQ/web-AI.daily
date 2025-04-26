@@ -80,7 +80,7 @@ export default {
 }
 
 .alert {
-    padding: 10px 20px; /* 增加一些水平内边距 */
+    padding: 10px 20px; 
     margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
@@ -89,23 +89,23 @@ export default {
     align-items: center;
     color: rgb(71, 67, 67);
     font-size: 14px;
-    max-width: 100%; /* 确保最大宽度不超过容器 */
-    white-space: pre-wrap; /* 确保文本换行 */
-    word-wrap: break-word; /* 确保长单词换行 */
+    max-width: 100%; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
 }
 
 .alert-icon {
-    margin-right: 10px; /* 为图标和文字之间添加间距 */
+    margin-right: 10px; 
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px; /* 增大图标字体大小 */
+    font-size: 15px; 
 }
 
 .alert-message {
-    flex-grow: 1; /* 使消息部分占据剩余空间 */
-    white-space: pre-wrap; /* 确保文本换行 */
-    word-wrap: break-word; /* 确保长单词换行 */
+    flex-grow: 1; 
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
 }
 
 .alert.info {
