@@ -1,59 +1,70 @@
 <!-- src/views/Home.vue -->
 <template>
-    <div class="main-place" ref="mainPlace">
-        <div v-if="isLoading" class="loading-state">
-            <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo" style="opacity: 0.6; padding-right: 3px;">
-            <div class=" no-cards-text card-description">
-                <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
+        <div class="main-place" ref="mainPlace">
+            <div v-if="isLoading" class="loading-state">
+                <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo"
+                    style="opacity: 0.6; padding-right: 3px;">
+                <div class=" no-cards-text card-description">
+                    <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
+                </div>
             </div>
-        </div>
-        <div v-else-if="cards.length === 0 && hasCardsSet" class="no-cards">
-            <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
-            <div class="no-cards-text card-description">
+            <div v-else-if="cards.length === 0 && hasCardsSet" class="no-cards">
+                <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
+                <div class="no-cards-text card-description">
 
-                <p v-if="isBeforeGenerateTime">今日份的卡片还未生成哦</p>
-                <p v-else>卡片已经设置完成, 但到明天才能生成哦</p>
+                    <p v-if="isBeforeGenerateTime">今日份的卡片还未生成哦</p>
+                    <p v-else>卡片已经设置完成, 但到明天才能生成哦</p>
 
-                <p v-if="isBeforeGenerateTime">请等到 {{ generateTime }} 后再查看</p>
-                <p v-else>请等到明日 {{ generateTime }} 后再查看</p>
+                    <p v-if="isBeforeGenerateTime">请等到 {{ generateTime }} 后再查看</p>
+                    <p v-else>请等到明日 {{ generateTime }} 后再查看</p>
 
-                <p v-if="isBeforeGenerateTime"></p>
-                <p v-else><br>若当前时间为{{ generateTime }}后的10分钟内，卡片内容可能正在生成，请稍等片刻后再查看</p>
+                    <p v-if="isBeforeGenerateTime"></p>
+                    <p v-else><br>若当前时间为{{ generateTime }}后的10分钟内，卡片内容可能正在生成，请稍等片刻后再查看</p>
+                </div>
             </div>
-        </div>
-        <div v-else-if="cards.length === 0 && !isLoggedIn" class="no-cards">
+
+            <!--
+        <div v-else-if="!isLoggedIn" class="no-cards">
             <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
             <div class="no-cards-text card-description">
                 <p>您还未登录哦</p>
                 <p>请点击侧边栏头像区域前往登录</p>
             </div>
-        </div>
-        <div v-else-if="cards.length === 0 && isLoggedIn" class="no-cards">
-            <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
-            <div class="no-cards-text card-description">
-                <p>还没有添加卡片哦</p>
-                <p>点击侧边栏 “<img src="/edit.svg" alt="Edit Icon" class="icon1" />编辑” 按钮, 开启您的智能早报之旅</p>
+        </div>-->
+            <div v-else-if="cards.length === 0" class="no-cards">
+                <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
+                <div class="no-cards-text card-description">
+                    <p>还没有添加卡片哦</p>
+                    <p>点击侧边栏 “<img src="/edit.svg" alt="Edit Icon" class="icon1" />编辑” 按钮, 开启您的智能早报之旅</p>
+                </div>
+            </div>
+            <div v-else>
+                <transition-group name="card-list" tag="div" class="card-container">
+                    <div v-for="(card, index) in cards" :key="index" class="card"
+                        :class="{ 'has-header-image': card.headerImage, 'has-theme-color': !card.headerImage && themeColors[card.card_type] }"
+                        :style="{ '--theme-color': !card.headerImage ? themeColors[card.card_type] : '' }">
+                        <div class="card-header" :style="{ backgroundImage: `url(${card.headerImage || ''})` }"></div>
+                        <div class="card-content-container"
+                            :style="{ maxHeight: isExpanded[index] ? 'none' : '300px', overflow: 'hidden' }">
+                            <div class="card-content" v-html="renderMarkdown(card.content)"></div>
+                        </div>
+                        <button v-if="card.content.length > 200" class="expand-button" @click="toggleExpand(index)">
+                            <img v-if="isExpanded[index]" src="/public/up.svg" alt="收起" class="icon1" />
+                            <img v-else src="/public/down.svg" alt="展开" class="icon1" />
+                        </button>
+                    </div>
+                    <!-- 新增声明卡片 -->
+                    <div v-if="cards.length > 0" class="card" :key="'footer'" style="text-align: center; font-size: 14px; color: #999;">
+                        <div class="card-content">
+                            <p>本站部分文本由AI生成，请注意甄别。</p>
+                            <p>Powered by <a href="https://ai-daily.vastocean.work/" target="_blank">AI-Daily</a>. Made by Vastocean & 2 coder.</p>
+                        </div>
+                    </div>
+                </transition-group>
+                <div class="upper-main"></div>
             </div>
         </div>
-        <div v-else>
-            <transition-group name="card-list" tag="div" class="card-container">
-                <div v-for="(card, index) in cards" :key="index" class="card"
-                    :class="{ 'has-header-image': card.headerImage, 'has-theme-color': !card.headerImage && themeColors[card.card_type] }"
-                    :style="{ '--theme-color': !card.headerImage ? themeColors[card.card_type] : '' }">
-                    <div class="card-header" :style="{ backgroundImage: `url(${card.headerImage || ''})` }"></div>
-                    <div class="card-content-container" :style="{ maxHeight: isExpanded[index] ? 'none' : '300px', overflow: 'hidden' }">
-                        <div class="card-content" v-html="renderMarkdown(card.content)"></div>
-                    </div>
-                    <button v-if="card.content.length > 200" class="expand-button" @click="toggleExpand(index)">
-                        <img v-if="isExpanded[index]" src="/public/up.svg" alt="收起" class="icon1" />
-                        <img v-else src="/public/down.svg" alt="展开" class="icon1" />
-                    </button>
-                </div>
-            </transition-group>
-            <div class="upper-main"></div>
-        </div>
-    </div>
-    <fixed-buttons v-if="cards.length > 0" :main-place-ref="mainPlace" :cards="cards" id="buttons"></fixed-buttons>
+        <fixed-buttons v-if="cards.length > 0" :main-place-ref="mainPlace" :cards="cards" id="buttons"></fixed-buttons>
 </template>
 
 <script>
@@ -87,7 +98,7 @@ export default {
         };
 
         const cards = ref([]);
-        const isExpanded = ref([]); // 新增：控制卡片展开/折叠状态
+        const isExpanded = ref([]);
         const isLoading = ref(true);
         const hasCardsSet = ref(false);
         const generateTime = ref('');
@@ -95,12 +106,13 @@ export default {
         const isWithin10MinutesAfterGenerateTime = ref(false);
         const isLoggedIn = ref(false);
 
-        // 新增：初始化 isExpanded 状态
+        // 示例用户 ID
+        const exampleUserId = 'fc08b2f5-dbe8-4aaa-a842-417e5238ee87';
+
         const initExpandedState = () => {
             isExpanded.value = cards.value.map(() => false);
         };
 
-        // 新增：切换卡片展开/折叠状态
         const toggleExpand = (index) => {
             isExpanded.value[index] = !isExpanded.value[index];
         };
@@ -109,7 +121,7 @@ export default {
             return md.render(content);
         };
 
-        // 新增：获取生成时间
+        // 获取生成时间
         const fetchGenerateTime = async () => {
             try {
                 const response = await axios.post(
@@ -117,7 +129,7 @@ export default {
                     {
                         workflow_id: '7494504516701274162',
                         parameters: {
-                            user_id: getCookie('user_id'),
+                            user_id: getCookie('user_id') || exampleUserId, // 使用示例用户 ID
                             time: "0 0 0 * * *"
                         }
                     },
@@ -141,19 +153,41 @@ export default {
                     generateDate.setHours(hour, minute, 0, 0);
                     isWithin10MinutesAfterGenerateTime.value = now >= generateDate && now <= new Date(generateDate.getTime() + 10 * 60 * 1000);
                     isBeforeGenerateTime.value = now < generateDate;
-                    
                 }
             } catch (error) {
                 console.error('Error fetching generate time:', error);
             }
         };
 
-        // 新增：检查是否有卡片设置
+        // 检查是否有卡片设置
         const checkCardsSet = async () => {
             const user_id = getCookie('user_id');
             if (!user_id) {
-                console.error('User ID not found in cookies');
                 isLoggedIn.value = false;
+                // 使用示例用户 ID 检查卡片设置
+                try {
+                    const response = await axios.post(
+                        `https://api.coze.cn/v1/workflow/run`,
+                        {
+                            workflow_id: '7496712396578783282',
+                            parameters: {
+                                user_id: exampleUserId,
+                                time: "2025-01-01 00:00:00.000 "
+
+                            }
+                        },
+                        {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            }
+                        }
+                    );
+                    const responseData = JSON.parse(response.data.data);
+                    hasCardsSet.value = responseData.code === 1 && responseData.cards.length > 0;
+                } catch (error) {
+                    console.error('Error checking cards set:', error);
+                }
                 return;
             }
             isLoggedIn.value = true;
@@ -164,7 +198,7 @@ export default {
                     {
                         workflow_id: '7496712396578783282',
                         parameters: {
-                            user_id: user_id
+                            user_id: user_id,
                         }
                     },
                     {
@@ -181,14 +215,9 @@ export default {
             }
         };
 
+        // 获取卡片数据
         const fetchCards = async () => {
-            const user_id = getCookie('user_id');
-            if (!user_id) {
-                console.error('User ID not found in cookies');
-                isLoading.value = false;
-                return;
-            }
-
+            const user_id = getCookie('user_id') || exampleUserId; // 使用示例用户 ID
             try {
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
@@ -222,7 +251,7 @@ export default {
                             headerImage: card.card_top_img || ''
                         };
                     });
-                    initExpandedState(); // 初始化 isExpanded 状态
+                    initExpandedState();
                 } else {
                     console.error('Failed to fetch cards:', responseData.msg);
                 }
@@ -245,7 +274,7 @@ export default {
                 duration: 500,
                 delay: 100,
                 origin: 'bottom',
-                reset: true,
+                reset: false,
                 mobile: true,
                 distance: '10px',
                 opacity: 0.001,

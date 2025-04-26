@@ -33,12 +33,15 @@
                 <div class="time-setting">
                     <el-form label-position="left" label-width="87px" style="margin-top: -20px;">
                         <el-form-item label="生成时间">
-                            <el-time-select v-model="generateTime" format="HH:mm" placeholder="未选择" start="5:20"
-                                end="12:00" step="00:10" clearable="false" editable="false" label-width="10px"
+                            <el-time-select v-model="generateTime" format="HH:mm" placeholder="未选择" start="0:00"
+                                end="23:50" step="00:10" clearable="false" editable="false" label-width="10px"
                                 style="width: 163px" :class="{ 'required-field': !generateTime }"></el-time-select>
                         </el-form-item>
+                        <p style=" font-size: 12px;color:darkgray; margin-bottom: 15px;">
+                            此处填写的时间为早报内容开始生成的时间点。支持手动输入和列表选择，只允许填入10分钟的倍数的时间。设定有误可能导致生成重复卡片。
+                        </p>
                         <p style=" font-size: 12px;color:darkgray;">
-                            此处填写的时间为早报内容开始生成的时间点。从生成启动到内容展示， 通常需要 5-10 分钟的处理时间。为确保您能及时获取早报，建议将设定时间提前 10 分钟，以获得更流畅的体验。
+                            从生成程序启动到内容展示，通常需要5-10分钟的处理时间。为确保您能及时获取早报，建议将设定时间提前 10 分钟，以获得更流畅的体验。
                         </p>
                     </el-form>
                     <p style="font-size: 12px;color: #ff8787; margin-top: 15px;">
@@ -97,6 +100,9 @@
                         </div>
                         <div v-else-if="card.type === 'weather'">
                             <h2>☀️ 天气</h2>
+                            <el-form-item label=" 生成图片">
+                                <el-switch v-model="card.generateImage" />
+                            </el-form-item>
                             <el-form-item label="城市">
                                 <el-input v-model="card.city" placeholder="IP或城市任填一个" />
                             </el-form-item>
@@ -210,7 +216,8 @@
                             </el-form-item>
                             <el-form-item label="正文内容">
                                 <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }"
-                                    placeholder="必填，可使用markdown语法填写文本。第一行使用 # 为开头则可作为卡片标题" :class="{ 'required-field': !card.content }" />
+                                    placeholder="必填，可使用markdown语法填写文本。第一行使用 # 为开头则可作为卡片标题"
+                                    :class="{ 'required-field': !card.content }" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'customAI'">
@@ -381,6 +388,7 @@ export default {
                 switch (card.type) {
                     case 'weather':
                         relevantParams = {
+                            generateImage: card.generateImage,
                             city: card.city,
                             ip: card.ip,
                             requirement: card.requirement
