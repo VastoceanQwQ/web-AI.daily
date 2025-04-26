@@ -138,15 +138,15 @@ export default {
                     console.log('Parsed API Response:', responseData);
 
                     if (responseData.code === 1) {
-                        this.$refs.alertComponent.showAlert('注册成功，3秒后将跳转到登录页', 'success');
+                        this.$refs.alertComponent.showAlert('注册成功，2秒后将跳转到登录页', 'success');
 
                         // 设置注册成功状态
                         this.registerSuccess = true;
 
-                        // 注册成功后3秒自动跳转到登录页面
+                        // 注册成功后2秒自动跳转到登录页面
                         setTimeout(() => {
                             this.$router.push('/login');
-                        }, 3000);
+                        }, 2000);
                     } else if (responseData.code === 0) {
                         this.$refs.alertComponent.showAlert('用户名已存在', 'error');
                         this.errors.user_name = true; // 将用户名输入框标红

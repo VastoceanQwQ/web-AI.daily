@@ -10,7 +10,7 @@
         </router-link>
         <div v-else>
             <div id="footer-profile" class="profile">
-                <div class="profile-image"></div>
+                <div class="profile-image" :style="{ backgroundImage: `url(${avatarUrl})` }"></div>
                 <div class="profile-name">
                     {{ username }}
                 </div>
@@ -56,43 +56,33 @@
 
 <script>
 import { ref, onMounted, getCurrentInstance } from 'vue';
-
 import { getCookie, eraseCookie } from '@/utils/cookieUtils';
 import eventBus from '@/eventBus';
 
 export default {
     name: 'Sidebar',
     setup() {
-        const isHidden = ref(false); // 默认显示侧边栏
+        const isHidden = ref(false);
         const isLoggedIn = ref(false);
         const username = ref('');
-        const componentKey = ref(0); // 添加 key 属性
+        const avatarUrl = ref(getCookie('avatar') || '@/assets/atvate.jpg');
+        const componentKey = ref(0);
         const instance = getCurrentInstance();
-        // 使用instance.ctx或instance.proxy来访问组件实例
-        // 推荐使用proxy，因为它是响应式的
         const { ctx: that, proxy } = instance;
 
-        // 初始化时检查登录状态
         onMounted(() => {
             const storedUsername = getCookie('username');
             if (storedUsername) {
                 isLoggedIn.value = true;
                 username.value = storedUsername;
             }
-
-            // 监听刷新事件
             eventBus.on('refreshSidebar', refreshSidebar);
         });
 
-
-
         const refreshSidebar = () => {
             console.log('Sidebar refresh event received');
-            // 调用forceUpdate方法
-
             proxy.$forceUpdate();
             console.log('99');
-            //componentKey.value += 1; // 改变 key 的值，强制重新渲染组件
         };
 
         const toggleSidebar = () => {
@@ -121,7 +111,8 @@ export default {
             isHidden,
             isLoggedIn,
             username,
-            componentKey, // 返回 key 属性
+            avatarUrl,
+            componentKey,
             toggleSidebar,
             showSidebar,
             hideSidebar,
@@ -168,6 +159,8 @@ export default {
     width: 40px;
     height: 40px;
     margin-bottom: 5px;
+    background-size: cover;
+    background-position: center;
 }
 
 .profile-name {

@@ -132,7 +132,7 @@ export default {
 
                     if (responseData.code === 1) {
                         // 登录成功
-                        this.$refs.alertComponent.showAlert('登录成功，3秒后将跳转到主页', 'success');
+                        this.$refs.alertComponent.showAlert('登录成功，2秒后将跳转到主页', 'success');
 
                         // 根据“记住密码”状态设置 Cookie 过期时间
                         const days = this.remember ? 14 : null;
@@ -141,6 +141,7 @@ export default {
                         setCookie('username', this.username, days);
                         setCookie('encryptedPassword', encryptedPassword, days);
                         setCookie('user_id', responseData.user_id.toString(), days);
+                        setCookie('avatar', responseData.img, days);
 
                         // 更新侧边栏的状态
                         this.updateSidebar(this.username, responseData.user_id);
@@ -152,11 +153,11 @@ export default {
                         eventBus.emit('refreshSidebar');
                         console.log('refreshSidebar event emitted');
 
-                        // 登录成功后3秒自动跳转到主页
+                        // 登录成功后2秒自动跳转到主页
                         setTimeout(() => {
                             window.location.href = '/';
                             //this.$router.push('/');
-                        }, 3000);
+                        }, 2000);
                     } else if (responseData.code === -1) {
                         // 用户名不存在
                         this.$refs.alertComponent.showAlert('用户名不存在', 'error');
