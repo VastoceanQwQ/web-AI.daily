@@ -61,9 +61,14 @@
                 <div v-else-if="activeTab === 'about'">
                     <h2 style="margin-bottom: 20px;margin-top: 10px; margin-left: 5px;">关于</h2>
                     <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo"
-                        style="opacity: 1; padding-left: 3px;">
+                        style="opacity: 1; margin-left: 245px; margin-bottom: 10px;">
                     <div class=" no-cards-text card-description">
-                        <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
+                        <p style="font-size: 25px;letter-spacing:5px;opacity: 0.8;">晨析智报</p>
+                        <p style="font-size: 15px;opacity: 0.8; margin-top: 5px;">
+                            v1.0.1</p>
+                        <p style="font-size: 15px;opacity: 0.6; margin-top: 35px;">
+                            2025年中国大学生计算机设计大赛参赛作品</p>
+                        <p style="font-size: 15px;opacity: 0.6; margin-top: 35px;"></p>
                     </div>
                 </div>
             </div>
@@ -111,11 +116,11 @@ export default {
 
         const avatarUrl = this.getCookie('avatar');
         const username = this.getCookie('username');
-        
+
 
         if (avatarUrl) this.accountForm.avatarUrl = avatarUrl;
         if (username) this.accountForm.username = username;
-       
+
     },
     methods: {
         toggleEdit(field) {
@@ -234,7 +239,7 @@ export default {
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         },
-        
+
         setCookie(name, value, expires) {
             const date = new Date();
             if (expires) {
@@ -324,4 +329,3 @@ export default {
     color: #666;
 }
 </style>
-
