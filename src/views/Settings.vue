@@ -41,12 +41,10 @@
                             <el-button v-if="!accountForm.passwordDisabled" type="danger" style="margin-left: 10px;"
                                 @click="cancelEdit('password')">取消</el-button>
                         </el-form-item>
-                        <!-- 新增：确认密码框 -->
                         <el-form-item label="确认密码" style="margin-top: 20px;" v-if="!accountForm.passwordDisabled">
                             <el-input v-model="accountForm.confirmPassword" type="password" placeholder=""
                                 style="width: 280px;" :disabled="accountForm.passwordDisabled"></el-input>
                         </el-form-item>
-                        <!-- 删除: 大保存按钮 -->
                         <!-- <el-form-item style="margin-top: 30px;">
                             <el-button type="primary" style="margin-left: 0px;width: 100px;" @click="saveChanges">
                                 保存
@@ -61,9 +59,14 @@
                 <div v-else-if="activeTab === 'about'">
                     <h2 style="margin-bottom: 20px;margin-top: 10px; margin-left: 5px;">关于</h2>
                     <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo"
-                        style="opacity: 1; padding-left: 3px;">
+                        style="opacity: 1; margin-left: 245px; margin-bottom: 10px;">
                     <div class=" no-cards-text card-description">
-                        <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
+                        <p style="font-size: 25px;letter-spacing:5px;opacity: 0.8;">晨析智报</p>
+                        <p style="font-size: 15px;opacity: 0.8; margin-top: 5px;">
+                            v1.0.1</p>
+                        <p style="font-size: 15px;opacity: 0.6; margin-top: 35px;">
+                            2025年中国大学生计算机设计大赛参赛作品</p>
+                        <p style="font-size: 15px;opacity: 0.6; margin-top: 35px;"></p>
                     </div>
                 </div>
             </div>
@@ -99,7 +102,7 @@ export default {
         };
     },
     mounted() {
-        // 初始化 ScrollReveal 动画
+        
         const sr = ScrollReveal({
             origin: 'bottom',
             distance: '60px',
@@ -111,15 +114,15 @@ export default {
 
         const avatarUrl = this.getCookie('avatar');
         const username = this.getCookie('username');
-        
+
 
         if (avatarUrl) this.accountForm.avatarUrl = avatarUrl;
         if (username) this.accountForm.username = username;
-       
+
     },
     methods: {
         toggleEdit(field) {
-            // 修改逻辑：先切换编辑状态，再根据状态决定是否保存
+            
             if (this.accountForm[`${field}Disabled`]) {
                 // 如果当前是禁用状态，则切换为启用状态（进入编辑模式）
                 this.accountForm[`${field}Disabled`] = false;
@@ -130,11 +133,11 @@ export default {
             }
         },
         cancelEdit(field) {
-            // 取消编辑时，恢复为禁用状态
+            
             this.accountForm[`${field}Disabled`] = true;
         },
         saveField(field) {
-            // 保存逻辑保持不变
+            
             let isValid = true;
             let errorMessages = [];
 
@@ -160,7 +163,7 @@ export default {
             }
 
             if (!isValid) {
-                ElMessage.error(errorMessages.join('\n')); // 使用ElMessage替换alert
+                ElMessage.error(errorMessages.join('\n')); 
                 return;
             }
 
@@ -192,7 +195,7 @@ export default {
                         responseData = JSON.parse(response.data.data);
                     } catch (parseError) {
                         console.error('解析 JSON 字符串失败:', parseError);
-                        ElMessage.error('解析响应数据失败，请重试'); // 使用ElMessage替换alert
+                        ElMessage.error('解析响应数据失败，请重试'); 
                         return;
                     }
 
@@ -200,7 +203,7 @@ export default {
 
                     if (responseData.code === 1) {
                         // 保存成功
-                        ElMessage.success('保存成功'); // 使用ElMessage替换alert
+                        ElMessage.success('保存成功'); 
                         // 更新 Cookie
                         if (field === 'username') {
                             this.setCookie('username', this.accountForm.username, 30 * 24 * 60 * 60 * 1000);
@@ -213,19 +216,19 @@ export default {
                         }
                     } else {
                         // 保存失败
-                        ElMessage.error(`保存失败: ${responseData.msg || '未知错误'}`); // 使用ElMessage替换alert
+                        ElMessage.error(`保存失败: ${responseData.msg || '未知错误'}`); 
                     }
                 }).catch(error => {
-                    // 添加错误处理，显示具体的错误信息
+ 
                     if (error.response) {
                         console.error('API 错误响应:', error.response.data);
-                        ElMessage.error(`保存失败: ${error.response.data.msg || '未知错误'}`); // 使用ElMessage替换alert
+                        ElMessage.error(`保存失败: ${error.response.data.msg || '未知错误'}`); 
                     } else if (error.request) {
                         console.error('API 请求未收到响应:', error.request);
-                        ElMessage.error('网络错误，请检查网络连接'); // 使用ElMessage替换alert
+                        ElMessage.error('网络错误，请检查网络连接'); 
                     } else {
                         console.error('API 配置错误:', error.message);
-                        ElMessage.error('保存失败，请重试'); // 使用ElMessage替换alert
+                        ElMessage.error('保存失败，请重试'); 
                     }
                 });
         },
@@ -234,7 +237,7 @@ export default {
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         },
-        
+
         setCookie(name, value, expires) {
             const date = new Date();
             if (expires) {
@@ -324,4 +327,3 @@ export default {
     color: #666;
 }
 </style>
-

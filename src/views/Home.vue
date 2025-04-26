@@ -19,7 +19,7 @@
                     <p v-else>请等到明日 {{ generateTime }} 后再查看</p>
 
                     <p v-if="isBeforeGenerateTime"></p>
-                    <p v-else><br>若当前时间为{{ generateTime }}后的10分钟内，卡片内容可能正在生成，请稍等片刻后再查看</p>
+                    <p v-else><br>若当前时间为{{ generateTime }}后的10分钟内，卡片内容可能正在生成，请稍等片刻后查看</p>
                 </div>
             </div>
 
@@ -53,7 +53,7 @@
                             <img v-else src="/public/down.svg" alt="展开" class="icon1" />
                         </button>
                     </div>
-                    <!-- 新增声明卡片 -->
+                   
                     <div v-if="cards.length > 0" class="card" :key="'footer'" style="text-align: center; font-size: 14px; color: #999;">
                         <div class="card-content">
                             <p>本站部分文本由AI生成，请注意甄别。</p>
@@ -106,7 +106,6 @@ export default {
         const isWithin10MinutesAfterGenerateTime = ref(false);
         const isLoggedIn = ref(false);
 
-        // 示例用户 ID
         const exampleUserId = 'fc08b2f5-dbe8-4aaa-a842-417e5238ee87';
 
         const initExpandedState = () => {
@@ -129,7 +128,7 @@ export default {
                     {
                         workflow_id: '7494504516701274162',
                         parameters: {
-                            user_id: getCookie('user_id') || exampleUserId, // 使用示例用户 ID
+                            user_id: getCookie('user_id') || exampleUserId, 
                             time: "0 0 0 * * *"
                         }
                     },
@@ -366,7 +365,6 @@ export default {
 
 .card.has-header-image .card-header {
     height: 200px;
-    /* 设置头图的高度 */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -512,7 +510,6 @@ export default {
 
 .no-cards-image {
     width: 150px;
-    /* 根据需要调整图片大小 */
     height: auto;
     margin-bottom: 20px;
     filter: grayscale(30%);
@@ -526,7 +523,7 @@ export default {
     font-weight: bold;
 }
 
-/* 修改：加载状态样式 */
+
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -539,12 +536,10 @@ export default {
 
 .loading-logo {
     width: 100px;
-    /* 根据需要调整图片大小 */
     height: auto;
     margin-bottom: 20px;
 }
 
-/* 添加过渡效果的 CSS 类 */
 .card-list-enter-active,
 .card-list-leave-active {
     transition: opacity 0.5s ease;

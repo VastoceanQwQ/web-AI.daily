@@ -42,7 +42,7 @@
 import scrollReveal from 'scrollreveal';
 import Alert from './Alert.vue';
 import axios from 'axios';
-import CryptoJS from 'crypto-js'; // 导入 crypto-js
+import CryptoJS from 'crypto-js'; 
 
 export default {
     components: {
@@ -55,11 +55,11 @@ export default {
             passwordAgain: '',
             code: 0,
             errors: {},
-            isSubmitted: false, // 新增一个标志位，表示是否已提交
+            isSubmitted: false, 
             api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
             workflow_id: '7495766150467895306',
-            isLoading: false, // 新增一个标志位，表示是否正在加载
-            registerSuccess: false, // 新增一个标志位，表示是否注册成功
+            isLoading: false, 
+            registerSuccess: false, 
         };
     },
     mounted() {
@@ -68,9 +68,9 @@ export default {
     methods: {
         async handleRegister() {
             this.errors = {};
-            this.isSubmitted = true; // 设置为已提交
-            this.isLoading = true; // 设置为正在加载
-            this.registerSuccess = false; // 重置注册成功状态
+            this.isSubmitted = true; 
+            this.isLoading = true; 
+            this.registerSuccess = false; 
             let isValid = true;
             let errorMessages = [];
 
@@ -149,7 +149,7 @@ export default {
                         }, 2000);
                     } else if (responseData.code === 0) {
                         this.$refs.alertComponent.showAlert('用户名已存在', 'error');
-                        this.errors.user_name = true; // 将用户名输入框标红
+                        this.errors.user_name = true; 
                     } else {
                         this.$refs.alertComponent.showAlert(responseData.msg || '注册失败', 'error');
                     }
@@ -170,12 +170,12 @@ export default {
 
                     this.$refs.alertComponent.showAlert(errorMsg, 'error');
                 } finally {
-                    this.isLoading = false; // 请求完成后设置为未加载
+                    this.isLoading = false;
                 }
             } else {
                 const combinedErrors = errorMessages.join('\n');
                 this.$refs.alertComponent.showAlert(combinedErrors, 'error');
-                this.isLoading = false; // 验证失败时设置为未加载
+                this.isLoading = false; 
             }
         },
         initScrollReveal() {
@@ -197,7 +197,7 @@ export default {
         },
         resetValidation(fieldName) {
             if (!this.isSubmitted) {
-                this.errors[fieldName] = false; // 重置错误状态
+                this.errors[fieldName] = false; 
             }
         },
     },
@@ -224,7 +224,6 @@ export default {
 
 .login .image {
     position: absolute;
-    /* 绝对定位 */
     top: 0;
     left: 0;
     width: 100%;
@@ -233,14 +232,12 @@ export default {
     border-radius: 12px;
     overflow: hidden;
     z-index: 1;
-    /* 确保图片在表单下方 */
 }
 
 .login .image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* 使图片填充整个容器 */
 }
 
 .login .image::before {
@@ -257,7 +254,6 @@ export default {
 
 .login .loginform {
     position: absolute;
-    /* 绝对定位 */
     top: 0;
     right: 0;
     width: 38%;
@@ -268,11 +264,9 @@ export default {
     align-items: center;
     justify-content: center;
     background-color: rgba(255, 255, 255, 0.85);
-    /* 调整背景颜色以确保表单可见 */
     backdrop-filter: blur(20px);
     border-radius: 0 12px 12px 0;
     z-index: 2;
-    /* 确保表单在图片上方 */
 }
 
 .login .loginform h2 {
@@ -307,9 +301,7 @@ export default {
 
 .login .loginform input::placeholder {
     color: #999;
-    /* 提示文字颜色变灰 */
     opacity: 1;
-    /* Firefox */
 }
 
 .login .loginform input:focus {

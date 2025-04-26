@@ -1,6 +1,5 @@
 <template>
     <div class="edit-container">
-        <!-- 左侧固定面板 -->
         <div class="left-panel">
             <div class="card" style="padding-left: 28px;">
                 <h1 style="font-weight:600; margin-bottom: 5px;">编辑</h1>
@@ -252,7 +251,6 @@
 
                     </el-form>
                 </div>
-                <!-- 新增: 空状态提示 -->
                 <div v-if="cards.length === 0" class="no-cards">
                     <img src="/public/neko01.png" alt="No Cards" />
                     <p>没有卡片哦</p>
@@ -260,7 +258,6 @@
                 </div>
             </transition-group>
         </div>
-        <!-- 新增 ElDialog 组件 -->
         <el-dialog v-model="discardDialogVisible" title="提示" width="30%">
             <span>确定要放弃所有更改吗？</span>
             <template #footer>
@@ -340,7 +337,7 @@ export default {
         beforeUnloadHandler(event) {
             if (this.isDirty) {
                 event.preventDefault();
-                event.returnValue = '您有未保存的更改，确定要离开吗？'; // 修复：正确设置提示信息
+                event.returnValue = '您有未保存的更改，确定要离开吗？'; 
             }
         },
         getEmoji(type) {
@@ -376,14 +373,12 @@ export default {
             return chineseTypeMap[type] || '未知';
         },
         saveChanges() {
-            // 检查是否有需要保存的卡片
+
             if (this.cards.length === 0) {
                 return;
             }
-
-            // 遍历所有卡片并依次保存
+          
             this.cards.forEach((card) => {
-                // 根据卡片类型提取相关参数
                 let relevantParams = {};
                 switch (card.type) {
                     case 'weather':
@@ -468,7 +463,7 @@ export default {
                     card_number: card.card_number,
                     data: JSON.stringify({
                         ...relevantParams,
-                        card_number: card.card_number // 每次都保存顺序
+                        card_number: card.card_number 
                     })
                 };
 
@@ -476,7 +471,7 @@ export default {
                 axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496722349124993061', // 假设这是保存卡片的workflow_id
+                        workflow_id: '7496722349124993061', 
                         parameters: {
                             user_id: getCookie('user_id'),
                             card_id: cardData.card_id,
@@ -559,8 +554,7 @@ export default {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index - 1];
                 this.cards[index - 1] = temp;
-
-                // 更新卡片顺序
+               
                 this.cards.forEach((card, i) => {
                     card.card_number = i + 1;
                 });
@@ -572,8 +566,7 @@ export default {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index + 1];
                 this.cards[index + 1] = temp;
-
-                // 更新卡片顺序
+                
                 this.cards.forEach((card, i) => {
                     card.card_number = i + 1;
                 });
@@ -582,8 +575,7 @@ export default {
 
         deleteCard(index) {
             this.cards.splice(index, 1);
-
-            // 更新卡片顺序
+            
             this.cards.forEach((card, i) => {
                 card.card_number = i + 1;
             });
@@ -600,7 +592,7 @@ export default {
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496712396578783282', // 假设这是获取卡片列表的workflow_id
+                        workflow_id: '7496712396578783282', 
                         parameters: {
                             user_id: user_id
                         }
@@ -618,8 +610,7 @@ export default {
                     this.cards = responseData.cards.map(card => {
 
                         const cardData = JSON.parse(card.data);
-
-                        // 确保所有字段都正确映射
+                        
                         return {
                             card_id: card.card_id,
                             type: card.data_type,
@@ -667,7 +658,7 @@ export default {
                 const response = await axios.post(
                     this.timeApiUrl,
                     {
-                        workflow_id: '7494504516701274162', // 假设这是获取生成时间的 workflow_id
+                        workflow_id: '7494504516701274162', 
                         parameters: {
                             user_id: getCookie('user_id'),
                             time: "0 0 0 * * *"
@@ -685,7 +676,7 @@ export default {
                     this.generateTime = '';
                 }
                 else if (responseData.code === 3) {
-                    // 使用新增的 convertCronToTime 方法将 Cron 表达式转换为 HH:mm 格式
+                    
                     this.generateTime = this.convertCronToTime(responseData.time);
                     if (this.generateTime === '00:00') {
                         this.generateTime = '';
@@ -698,14 +689,14 @@ export default {
             }
         },
 
-        // 修改：获取用户公网 IP 地址
+       
         async getIP(index) {
             let card = this.cards[index];
-            card.ipLoading = true; // 局部加载状态
+            card.ipLoading = true; 
             try {
                 const response = await axios.get('https://qifu-api.baidubce.com/ip/local/geo/v1/district');
                 if (response.data.ip) {
-                    card.ip = response.data.ip; // 填入对应卡片
+                    card.ip = response.data.ip; 
                     ElMessage.success('IP 获取成功');
                 } else {
                     ElMessage.error('无法获取 IP 地址');
@@ -714,17 +705,17 @@ export default {
                 console.error('获取 IP 失败:', error);
                 ElMessage.error('获取 IP 失败，请检查网络连接');
             } finally {
-                card.ipLoading = false; // 结束加载
+                card.ipLoading = false; 
             }
         },
 
-        // 修改：获取用户经纬度位置
+        
         async getLocation(index) {
             let card = this.cards[index];
-            card.locationLoading = true; // 局部加载状态
+            card.locationLoading = true; 
             if (!navigator.geolocation) {
                 ElMessage.error('您的浏览器不支持获取地理位置');
-                card.locationLoading = false; // 结束加载
+                card.locationLoading = false; 
                 return;
             }
 
@@ -734,26 +725,26 @@ export default {
                 });
 
                 const { latitude, longitude } = position.coords;
-                card.location = `${latitude},${longitude}`; // 填入对应卡片
+                card.location = `${latitude},${longitude}`; 
                 ElMessage.success('定位获取成功');
             } catch (error) {
                 console.error('获取定位失败:', error);
                 ElMessage.error('获取定位失败，请检查权限设置');
             } finally {
-                card.locationLoading = false; // 结束加载
+                card.locationLoading = false; 
             }
         },
 
         async saveGenerateTime() {
             try {
-                // 将 HH:mm 转换为 Cron 表达式
+                
                 const [hour, minute] = this.generateTime.split(':');
                 const cronTime = `0 ${minute} ${hour} * * *`;
 
                 const response = await axios.post(
                     this.timeApiUrl,
                     {
-                        workflow_id: '7494504516701274162', // 假设这是保存生成时间的 workflow_id
+                        workflow_id: '7494504516701274162',
                         parameters: {
                             user_id: getCookie('user_id'),
                             time: cronTime
@@ -777,8 +768,7 @@ export default {
                 console.error('生成时间保存失败');
             }
         },
-
-        // 新增方法：删除云端卡片
+        
         async deleteCardsFromServer(deletedCardIds) {
             const user_id = getCookie('user_id');
             if (!user_id) {
@@ -791,7 +781,7 @@ export default {
                     const response = await axios.post(
                         `https://api.coze.cn/v1/workflow/run`,
                         {
-                            workflow_id: '7496749965827014719', // 假设这是删除卡片的workflow_id
+                            workflow_id: '7496749965827014719', 
                             parameters: {
                                 card_id: cardId
                             }
@@ -817,14 +807,14 @@ export default {
         },
 
         async manualSave() {
-            if (this.loading) return; // 防止重复提交
+            if (this.loading) return; 
 
             if (!this.generateTime) {
                 ElMessage.warning('请设置生成时间');
                 return;
             }
 
-            // 校验必填字段
+            
             const missingRequiredFields = [];
             this.cards.forEach((card, index) => {
                 switch (card.type) {
@@ -865,7 +855,7 @@ export default {
 
             if (missingRequiredFields.length > 0) {
                 ElMessage.warning('请填写所有必填参数');
-                // 标记未填写的必填字段
+                
                 missingRequiredFields.forEach(({ index, field }) => {
                     this.$set(this.cards[index], `${field}Error`, true);
                 });
@@ -875,20 +865,20 @@ export default {
             this.loading = true;
 
             try {
-                // 获取本地删除的卡片ID
-                const localCardIds = this.cards.map(card => card.card_id); // 当前本地卡片ID
-                const serverCardIds = await this.fetchServerCardIds(); // 从服务器获取所有卡片ID
+                
+                const localCardIds = this.cards.map(card => card.card_id); 
+                const serverCardIds = await this.fetchServerCardIds(); 
 
-                // 计算本地删除的卡片ID
+                
                 const deletedCardIds = serverCardIds.filter(id => !localCardIds.includes(id));
 
                 console.log('deletedCardIds:', deletedCardIds);
 
-                // 调用删除云端卡片的方法
+                
                 await this.deleteCardsFromServer(deletedCardIds);
 
-                await this.saveGenerateTime(); // 保存生成时间
-                await this.saveChanges(); // 保存卡片信息
+                await this.saveGenerateTime(); 
+                await this.saveChanges(); 
                 ElMessage.success('保存成功');
             } catch (error) {
                 console.error('Error during manual save:', error);
@@ -897,8 +887,7 @@ export default {
                 this.loading = false;
             }
         },
-
-        // 新增方法：从服务器获取所有卡片ID
+        
         async fetchServerCardIds() {
             const user_id = getCookie('user_id');
             if (!user_id) {
@@ -910,7 +899,7 @@ export default {
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496712396578783282', // 假设这是获取卡片列表的workflow_id
+                        workflow_id: '7496712396578783282', 
                         parameters: {
                             user_id: user_id
                         }
@@ -936,7 +925,7 @@ export default {
             }
         },
 
-        // 新增方法：滚动到页面顶部
+        
         scrollToTop() {
             window.scrollTo({
                 top: 0,
@@ -946,8 +935,8 @@ export default {
     },
     mounted() {
         this.fetchCards();
-        this.fetchGenerateTime(); // 页面加载时获取生成时间
-        window.addEventListener('beforeunload', this.beforeUnloadHandler); // 监听页面卸载事件
+        this.fetchGenerateTime(); 
+        window.addEventListener('beforeunload', this.beforeUnloadHandler); 
 
         const loadingInstance = ElLoading.service({
             lock: true,
@@ -956,7 +945,7 @@ export default {
             customClass: 'custom-loading'
         });
 
-        // 初始化 scrollReveal 动画
+        
         const sr = ScrollReveal({
             origin: 'bottom',
             distance: '10px',
@@ -964,21 +953,21 @@ export default {
             delay: 0,
             reset: false,
             mobile: true,
-            opacity: 0.001, // 确保动画结束后透明度为 1
+            opacity: 0.001, 
             easing: 'cubic-bezier(0.5, 0, 0, 1)',
             scale: 0.9,
         });
 
-        // 左半部分立即展示动画
+        
         sr.reveal('.left-panel .card', {
             interval: 100,
-            opacity: 1, // 确保动画结束后透明度为 1
+            opacity: 1, 
         });
 
         this.fetchCards().then(() => {
             this.fetchGenerateTime().then(() => {
-                loadingInstance.close(); // 数据加载完成后关闭加载动画
-                // 修改：延迟1秒后将 loadingState 设置为 false
+                loadingInstance.close(); 
+                
                 setTimeout(() => {
                     this.loadingState = false;
                 }, 1000);
@@ -1009,9 +998,7 @@ export default {
     padding: 20px;
     height: 100vh;
     position: fixed;
-    /* 固定定位 */
     top: 20;
-    /* 固定在顶部 */
     user-select: none;
     padding-left: 20px;
     z-index: 200;
@@ -1028,16 +1015,13 @@ export default {
     padding: 20px;
     height: 100%;
     overflow-y: auto;
-    /* 右半部分可以滚动 */
     margin-left: 30%;
-    /* 保持与左侧面板的间距 */
     user-select: none;
 }
 
 .right-panel .card-container {
     column-count: 2;
     column-gap: 20px;
-    /* 两列间距 */
 }
 
 .left-panel .card {
@@ -1129,7 +1113,6 @@ button:hover {
     color: #fff;
 }
 
-/* 添加过渡效果的 CSS 类 */
 .card-list-enter-active,
 .card-list-leave-active {
     transition: opacity 0.5s ease;
@@ -1140,7 +1123,6 @@ button:hover {
     opacity: 0;
 }
 
-/* 移植 Home.vue 中的文字样式 */
 .card-content {
     padding: 25px;
     color: #333;
@@ -1244,24 +1226,19 @@ button:hover {
     align-items: center;
 }
 
-/* 修改 textarea 的样式，使文字颜色变淡 */
 .el-textarea__inner {
     color: #999;
-    /* 设置文字颜色为浅灰色 */
 }
 
-/* 确保 textarea 可编辑 */
+
 .el-textarea__inner:read-only {
     background-color: #fff;
-    /* 保持背景为白色 */
     cursor: text;
-    /* 设置光标为文本输入状态 */
 }
 
 .card-buttons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    /* 两列布局 */
     gap: 8px;
     margin-top: 10px;
 
@@ -1288,7 +1265,6 @@ button:hover {
     color: #000;
 }
 
-/* 卡片底部信息的样式 */
 .el-form-item__label {
     font-weight: bold;
     color: #555;
@@ -1301,12 +1277,9 @@ button:hover {
 
 .custom-loading {
     z-index: 100 !important;
-    /* 确保遮罩不会覆盖左侧面板 */
     margin-left: 350px;
-    /* 避免遮罩覆盖左侧固定面板 */
 }
 
-/* 新增: 空状态样式 */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -1323,7 +1296,6 @@ button:hover {
     margin-bottom: 10px;
 }
 
-/* 新增：必填字段样式 */
 .required-field {
     transition: border 0.1s ease;
     border: 1.5px solid rgb(255, 75, 75);
