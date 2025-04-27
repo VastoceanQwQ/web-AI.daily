@@ -8,14 +8,14 @@
                 </div>
             </div>
         </router-link>
-        <div v-else>
+        <router-link to="/settings" v-else>
             <div id="footer-profile" class="profile">
                 <div class="profile-image" :style="{ backgroundImage: `url(${avatarUrl})` }"></div>
                 <div class="profile-name">
                     {{ username }}
                 </div>
             </div>
-        </div>
+        </router-link>
         <div class="sidebar-items">
             <router-link to="/" class="sidebar-item">
                 <img src="/waterfalls.svg" alt="Home Icon" class="icon" />

@@ -17,29 +17,48 @@
                         <el-form-item label="头像" style="margin-bottom:25px;">
                             <el-input v-model="accountForm.avatarUrl" style="width: 280px; margin-top: 0px;"
                                 placeholder="填入图片的url" :disabled="accountForm.avatarDisabled"></el-input>
-                            <el-button type="primary" style="margin-left: 30px;" @click="saveField('avatar')">
-                                {{ accountForm.avatarDisabled ? '修改' : '保存' }}
+                            <el-button v-if="accountForm.avatarDisabled" type="primary" style="margin-left: 30px; "
+                                :disabled="!accountForm.usernameDisabled ||
+                                    !accountForm.passwordDisabled" @click="toggleEdit('avatar')">
+                                修改
+                            </el-button>
+                            <el-button v-if="!accountForm.avatarDisabled" type="primary" style="margin-left: 30px;"
+                                @click="saveField('avatar')" :loading="accountForm.isLoading">
+                                保存
                             </el-button>
                             <el-button v-if="!accountForm.avatarDisabled" type="danger" style="margin-left: 10px;"
-                                @click="cancelEdit('avatar')">取消</el-button>
+                                @click="cancelEdit('avatar')" :disabled="accountForm.isLoading">取消</el-button>
                         </el-form-item>
                         <el-form-item label="用户名" style="margin-bottom:25px;">
                             <el-input v-model="accountForm.username" style="width: 280px;"
                                 :disabled="accountForm.usernameDisabled"></el-input>
-                            <el-button type="primary" style="margin-left: 30px;" @click="saveField('username')">
-                                {{ accountForm.usernameDisabled ? '修改' : '保存' }}
+                            <el-button v-if="accountForm.usernameDisabled" type="primary" style="margin-left: 30px; "
+                                :disabled="!accountForm.avatarDisabled ||
+                                    !accountForm.passwordDisabled" @click="toggleEdit('username')">
+                                修改
+                            </el-button>
+                            <el-button v-if="!accountForm.usernameDisabled" type="primary" style="margin-left: 30px;"
+                                @click="saveField('username')" :loading="accountForm.isLoading">
+                                保存
                             </el-button>
                             <el-button v-if="!accountForm.usernameDisabled" type="danger" style="margin-left: 10px;"
-                                @click="cancelEdit('username')">取消</el-button>
+                                @click="cancelEdit('username')" :disabled="accountForm.isLoading">取消</el-button>
                         </el-form-item>
                         <el-form-item label="密码">
                             <el-input v-model="accountForm.password" type="password" style="width: 280px;"
                                 :disabled="accountForm.passwordDisabled"></el-input>
-                            <el-button type="primary" style="margin-left: 30px;" @click="saveField('password')">
-                                {{ accountForm.passwordDisabled ? '修改' : '保存' }}
+
+                            <el-button v-if="accountForm.passwordDisabled" type="primary" style="margin-left: 30px; "
+                                :disabled="!accountForm.usernameDisabled ||
+                                    !accountForm.avatarDisabled" @click="toggleEdit('password')">
+                                修改
+                            </el-button>
+                            <el-button v-if="!accountForm.passwordDisabled" type="primary" style="margin-left: 30px;"
+                                @click="saveField('password'),toloding=true" :loading="accountForm.isLoading">
+                                保存
                             </el-button>
                             <el-button v-if="!accountForm.passwordDisabled" type="danger" style="margin-left: 10px;"
-                                @click="cancelEdit('password')">取消</el-button>
+                                @click="cancelEdit('password')" :disabled="accountForm.isLoading">取消</el-button>
                         </el-form-item>
                         <el-form-item label="确认密码" style="margin-top: 20px;" v-if="!accountForm.passwordDisabled">
                             <el-input v-model="accountForm.confirmPassword" type="password" placeholder=""
@@ -78,6 +97,7 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js'; // 引入CryptoJS库
 import { ElMessage } from 'element-plus'; // 引入ElMessage
+import { Loading } from 'element-plus/es/components/loading/src/service';
 import ScrollReveal from 'scrollreveal'; // 引入ScrollReveal
 
 export default {
@@ -89,20 +109,21 @@ export default {
                 avatar: '',
                 avatarUrl: '',
                 username: '',
-                password: '',
+                password: '********',
                 confirmPassword: '',
-                passwordDisplay: '**********',
-                avatarDisabled: false,
-                usernameDisabled: false,
-                passwordDisabled: false,
-                confirmPasswordDisabled: false
+                passwordDisplay: '',
+                avatarDisabled: true,
+                usernameDisabled: true,
+                passwordDisabled: true,
+                confirmPasswordDisabled: true,
+                isLoading : false,
             },
             api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
             isLoggingOut: false,
         };
     },
     mounted() {
-        
+
         const sr = ScrollReveal({
             origin: 'bottom',
             distance: '60px',
@@ -116,13 +137,14 @@ export default {
         const username = this.getCookie('username');
 
 
+
         if (avatarUrl) this.accountForm.avatarUrl = avatarUrl;
         if (username) this.accountForm.username = username;
 
     },
     methods: {
         toggleEdit(field) {
-            
+
             if (this.accountForm[`${field}Disabled`]) {
                 // 如果当前是禁用状态，则切换为启用状态（进入编辑模式）
                 this.accountForm[`${field}Disabled`] = false;
@@ -131,13 +153,27 @@ export default {
                 this.saveField(field);
                 this.accountForm[`${field}Disabled`] = true;
             }
+            if (field === 'password') {
+                this.accountForm.password = '';
+            }
         },
         cancelEdit(field) {
-            
+            if (field === 'avatar')
+                this.accountForm.avatarUrl = this.getCookie('avatar');
+            if (field === 'username')
+                this.accountForm.username = this.getCookie('username');
+            if (field === 'password') {
+                this.accountForm.password = '********';
+                this.accountForm.confirmPassword = '';
+            }
+
+
             this.accountForm[`${field}Disabled`] = true;
         },
         saveField(field) {
-            
+
+            this.accountForm.isLoading = true;
+
             let isValid = true;
             let errorMessages = [];
 
@@ -163,21 +199,35 @@ export default {
             }
 
             if (!isValid) {
-                ElMessage.error(errorMessages.join('\n')); 
+                ElMessage.error(errorMessages.join('\n'));
                 return;
             }
 
-            // 对密码进行MD5加密
-            const encryptedPassword = field === 'password' ? CryptoJS.MD5(this.accountForm.password).toString() : null;
+            // 先将当前保存的字段值存储到 cookie 中
+            if (field === 'username') {
+                this.setCookie('username', this.accountForm.username, 30 * 24 * 60 * 60 * 1000);
+            }
+            if (field === 'password') {
+                const encryptedPassword = CryptoJS.MD5(this.accountForm.password).toString();
+                this.setCookie('password', encryptedPassword, 30 * 24 * 60 * 60 * 1000);
+            }
+            if (field === 'avatar') {
+                this.setCookie('avatar', this.accountForm.avatarUrl, 30 * 24 * 60 * 60 * 1000);
+            }
+
+            // 从 cookie 中读取所有字段的值
+            const username = this.getCookie('username');
+            const password = this.getCookie('password');
+            const avatarUrl = this.getCookie('avatar');
 
             // 修改请求参数，确保符合API要求
             const requestData = {
                 workflow_id: '7496047468724469770',
                 parameters: {
                     user_id: this.getCookie('user_id'),
-                    change_password: field === 'password' ? encryptedPassword : undefined,
-                    change_account: field === 'username' ? this.accountForm.username : undefined,
-                    change_img: field === 'avatar' ? this.accountForm.avatarUrl : undefined,
+                    change_password: password ? password : undefined,
+                    change_account: username ? username : undefined,
+                    change_img: avatarUrl ? avatarUrl : undefined,
                 }
             };
 
@@ -195,7 +245,7 @@ export default {
                         responseData = JSON.parse(response.data.data);
                     } catch (parseError) {
                         console.error('解析 JSON 字符串失败:', parseError);
-                        ElMessage.error('解析响应数据失败，请重试'); 
+                        ElMessage.error('解析响应数据失败，请重试');
                         return;
                     }
 
@@ -203,32 +253,26 @@ export default {
 
                     if (responseData.code === 1) {
                         // 保存成功
-                        ElMessage.success('保存成功'); 
-                        // 更新 Cookie
-                        if (field === 'username') {
-                            this.setCookie('username', this.accountForm.username, 30 * 24 * 60 * 60 * 1000);
-                        }
-                        if (field === 'password') {
-                            this.setCookie('password', encryptedPassword, 30 * 24 * 60 * 60 * 1000); // 存储加密后的密码
-                        }
-                        if (field === 'avatar') {
-                            this.setCookie('avatar', this.accountForm.avatarUrl, 30 * 24 * 60 * 60 * 1000);
-                        }
+                        ElMessage.success('保存成功');
+
+                        setTimeout(() => {
+                            window.location.href = '/settings';
+                            //this.$router.push('/');
+                        }, 1500);
                     } else {
                         // 保存失败
-                        ElMessage.error(`保存失败: ${responseData.msg || '未知错误'}`); 
+                        ElMessage.error(`保存失败: ${responseData.msg || '未知错误'}`);
                     }
                 }).catch(error => {
- 
                     if (error.response) {
                         console.error('API 错误响应:', error.response.data);
-                        ElMessage.error(`保存失败: ${error.response.data.msg || '未知错误'}`); 
+                        ElMessage.error(`保存失败: ${error.response.data.msg || '未知错误'}`);
                     } else if (error.request) {
                         console.error('API 请求未收到响应:', error.request);
-                        ElMessage.error('网络错误，请检查网络连接'); 
+                        ElMessage.error('网络错误，请检查网络连接');
                     } else {
                         console.error('API 配置错误:', error.message);
-                        ElMessage.error('保存失败，请重试'); 
+                        ElMessage.error('保存失败，请重试');
                     }
                 });
         },
