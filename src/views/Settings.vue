@@ -19,7 +19,8 @@
                                 placeholder="填入图片的url" :disabled="accountForm.avatarDisabled"></el-input>
                             <el-button v-if="accountForm.avatarDisabled" type="primary" style="margin-left: 30px; "
                                 :disabled="!accountForm.usernameDisabled ||
-                                    !accountForm.passwordDisabled" @click="toggleEdit('avatar')">
+                                    !accountForm.passwordDisabled || accountForm.isLoading"
+                                @click="toggleEdit('avatar')">
                                 修改
                             </el-button>
                             <el-button v-if="!accountForm.avatarDisabled" type="primary" style="margin-left: 30px;"
@@ -34,7 +35,8 @@
                                 :disabled="accountForm.usernameDisabled"></el-input>
                             <el-button v-if="accountForm.usernameDisabled" type="primary" style="margin-left: 30px; "
                                 :disabled="!accountForm.avatarDisabled ||
-                                    !accountForm.passwordDisabled" @click="toggleEdit('username')">
+                                    !accountForm.passwordDisabled || accountForm.isLoading"
+                                @click="toggleEdit('username')">
                                 修改
                             </el-button>
                             <el-button v-if="!accountForm.usernameDisabled" type="primary" style="margin-left: 30px;"
@@ -50,11 +52,12 @@
 
                             <el-button v-if="accountForm.passwordDisabled" type="primary" style="margin-left: 30px; "
                                 :disabled="!accountForm.usernameDisabled ||
-                                    !accountForm.avatarDisabled" @click="toggleEdit('password')">
+                                    !accountForm.avatarDisabled || accountForm.isLoading"
+                                @click="toggleEdit('password')">
                                 修改
                             </el-button>
                             <el-button v-if="!accountForm.passwordDisabled" type="primary" style="margin-left: 30px;"
-                                @click="saveField('password'),toloding=true" :loading="accountForm.isLoading">
+                                @click="saveField('password'), toloding = true" :loading="accountForm.isLoading">
                                 保存
                             </el-button>
                             <el-button v-if="!accountForm.passwordDisabled" type="danger" style="margin-left: 10px;"
@@ -64,15 +67,13 @@
                             <el-input v-model="accountForm.confirmPassword" type="password" placeholder=""
                                 style="width: 280px;" :disabled="accountForm.passwordDisabled"></el-input>
                         </el-form-item>
-                        <!-- <el-form-item style="margin-top: 30px;">
-                            <el-button type="primary" style="margin-left: 0px;width: 100px;" @click="saveChanges">
-                                保存
+                        <el-form-item style="margin-top: 30px;">
+                            <!-- 新增退出登录按钮 -->
+                            <el-button type="warning" style="margin-left: 0px; width: 100px;" @click="logout" :disabled="!accountForm.usernameDisabled ||
+                                !accountForm.avatarDisabled || !accountForm.passwordDisabled || accountForm.isLoading">
+                                退出登录
                             </el-button>
-                            <el-button type="danger" style="margin-left: 10px;width: 100px;" @click="logoutAccount"
-                                :loading="isLoggingOut">
-                                注销账户
-                            </el-button>
-                        </el-form-item> -->
+                        </el-form-item>
                     </el-form>
                 </div>
                 <div v-else-if="activeTab === 'about'">
@@ -116,7 +117,7 @@ export default {
                 usernameDisabled: true,
                 passwordDisabled: true,
                 confirmPasswordDisabled: true,
-                isLoading : false,
+                isLoading: false,
             },
             api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
             isLoggingOut: false,
@@ -299,7 +300,26 @@ export default {
             document.cookie = 'avatar=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             document.cookie = 'password=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        }
+        },
+        logout() {
+
+            this.clearAccountData();
+            document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            ElMessage.success('已退出登录');
+            this.accountForm.isLoading = true;
+            // 确保 eventBus 存在并调用 emit 方法
+            /*if (this.$bus && typeof this.$bus.emit === 'function') {
+                this.$bus.emit('refreshSidebar');
+            } else {
+                console.error('EventBus is not properly initialized or does not have an emit method.');
+            }
+            // 跳转到登录页面
+            this.$router.push('/login');*/
+            setTimeout(() => {
+                window.location.href = '/login';
+                //this.$router.push('/');
+            }, 1500);
+        },
     }
 };
 </script>

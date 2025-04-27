@@ -81,8 +81,8 @@ export default {
 
         const refreshSidebar = () => {
             console.log('Sidebar refresh event received');
-            proxy.$forceUpdate();
-            console.log('99');
+            // 强制刷新组件
+            componentKey.value += 1;
         };
 
         const toggleSidebar = () => {
