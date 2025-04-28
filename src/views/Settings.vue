@@ -147,11 +147,8 @@ export default {
         toggleEdit(field) {
 
             if (this.accountForm[`${field}Disabled`]) {
-                // 如果当前是禁用状态，则切换为启用状态（进入编辑模式）
                 this.accountForm[`${field}Disabled`] = false;
             } else {
-                // 如果当前是启用状态，则保存字段并切换回禁用状态
-                this.saveField(field);
                 this.accountForm[`${field}Disabled`] = true;
             }
             if (field === 'password') {
@@ -183,6 +180,7 @@ export default {
                 if (!usernameRegex.test(this.accountForm.username)) {
                     errorMessages.push('用户名3-15字，只能包含大小写字母、汉字、数字和下划线');
                     isValid = false;
+                    this.accountForm.isLoading = false;
                 }
             }
 
@@ -191,11 +189,13 @@ export default {
                 if (!passwordRegex.test(this.accountForm.password)) {
                     errorMessages.push('密码6-20位，必须含有字母与数字，只能包含大小写字母、数字和下划线');
                     isValid = false;
+                    this.accountForm.isLoading = false;
                 }
 
                 if (this.accountForm.password !== this.accountForm.confirmPassword) {
                     errorMessages.push('两次输入的密码不一致');
                     isValid = false;
+                    this.accountForm.isLoading = false;
                 }
             }
 
@@ -208,7 +208,7 @@ export default {
             if (field === 'username') {
                 this.setCookie('username', this.accountForm.username, 30 * 24 * 60 * 60 * 1000);
             }
-            if (field === 'password') {
+            if (field === 'password' && this.accountForm.password !== '') {
                 const encryptedPassword = CryptoJS.MD5(this.accountForm.password).toString();
                 this.setCookie('password', encryptedPassword, 30 * 24 * 60 * 60 * 1000);
             }
@@ -226,9 +226,9 @@ export default {
                 workflow_id: '7496047468724469770',
                 parameters: {
                     user_id: this.getCookie('user_id'),
-                    change_password: password ? password : undefined,
-                    change_account: username ? username : undefined,
-                    change_img: avatarUrl ? avatarUrl : undefined,
+                    change_password: password,
+                    change_account: username,
+                    change_img: avatarUrl,
                 }
             };
 
@@ -307,17 +307,15 @@ export default {
             document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             ElMessage.success('已退出登录');
             this.accountForm.isLoading = true;
-            // 确保 eventBus 存在并调用 emit 方法
-            /*if (this.$bus && typeof this.$bus.emit === 'function') {
+            /*
+            if (this.$bus && typeof this.$bus.emit === 'function') {
                 this.$bus.emit('refreshSidebar');
             } else {
                 console.error('EventBus is not properly initialized or does not have an emit method.');
             }
-            // 跳转到登录页面
             this.$router.push('/login');*/
             setTimeout(() => {
                 window.location.href = '/login';
-                //this.$router.push('/');
             }, 1500);
         },
     }
@@ -364,14 +362,16 @@ export default {
     margin-top: 5px;
 
 }
-
 .settings-card .menu ul li:hover {
-    background-color: rgba(166, 209, 255, 0.615);
+    /*background-color: rgba(166, 209, 255, 0.615);*/
+    background-image: linear-gradient(0deg, #ffeef1cb 0%, #e2eeffcf 95%, #e1edfec2 100%);
 }
 
 .settings-card .menu ul li.active {
-    background-color: rgba(0, 123, 255, 0.733);
-    color: white;
+    /*background-color: rgba(0, 123, 255, 0.733);
+    color: white;*/
+    background-image: linear-gradient(0deg, #ffe5eb 0%, #dbe8fa 95%, #e3eefe 100%);
+    color: rgb(0, 0, 0);
 }
 
 .settings-card .content {

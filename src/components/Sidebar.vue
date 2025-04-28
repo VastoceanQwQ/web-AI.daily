@@ -17,25 +17,27 @@
             </div>
         </router-link>
         <div class="sidebar-items">
-            <router-link to="/" class="sidebar-item">
+            <router-link to="/" class="sidebar-item" :class="{ active: activePath === '/' }">
                 <img src="/waterfalls.svg" alt="Home Icon" class="icon" />
                 <span class="text">主页</span>
             </router-link>
-            <router-link to="/edit" class="sidebar-item" v-if="isLoggedIn">
+            <router-link to="/edit" class="sidebar-item" v-if="isLoggedIn" :class="{ active: activePath === '/edit' }">
                 <img src="/edit.svg" alt="Edit Icon" class="icon" />
                 <span class="text">编辑</span>
             </router-link>
-            <router-link to="/history" class="sidebar-item" v-if="isLoggedIn">
+            <router-link to="/history" class="sidebar-item" v-if="isLoggedIn" :class="{ active: activePath === '/history' }">
                 <img src="/history.svg" alt="History Icon" class="icon" />
                 <span class="text">历史</span>
             </router-link>
-            <router-link to="/settings" class="sidebar-item" v-if="isLoggedIn">
+            <router-link to="/settings" class="sidebar-item" v-if="isLoggedIn" :class="{ active: activePath === '/settings' }">
                 <img src="/setting.svg" alt="Setting Icon" class="icon" />
                 <span class="text">设置</span>
             </router-link>
+            <!--
             <div class="sidebar-item" v-if="isLoggedIn" @click="handleLogout">
                 <span class="text" @click="handleLogout">注销</span>
             </div>
+            -->
             <div class="sidebar-item" @click="hideSidebar" v-if="isHidden">
                 <img src="/left.svg" alt="Left Icon" class="icon" />
                 <span class="text"></span>
@@ -55,9 +57,10 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance, watch } from 'vue';
 import { getCookie, eraseCookie } from '@/utils/cookieUtils';
 import eventBus from '@/eventBus';
+import { useRoute } from 'vue-router';
 
 export default {
     name: 'Sidebar',
@@ -69,6 +72,9 @@ export default {
         const componentKey = ref(0);
         const instance = getCurrentInstance();
         const { ctx: that, proxy } = instance;
+        const route = useRoute(); 
+
+        const activePath = ref(route.path); 
 
         onMounted(() => {
             const storedUsername = getCookie('username');
@@ -79,9 +85,16 @@ export default {
             eventBus.on('refreshSidebar', refreshSidebar);
         });
 
+        // 监听路由变化，动态更新 activePath
+        watch(
+            () => route.path,
+            (newPath) => {
+                activePath.value = newPath;
+            }
+        );
+
         const refreshSidebar = () => {
             console.log('Sidebar refresh event received');
-            // 强制刷新组件
             componentKey.value += 1;
         };
 
@@ -106,7 +119,6 @@ export default {
             window.location.href = '/';
         };
 
-
         return {
             isHidden,
             isLoggedIn,
@@ -116,7 +128,8 @@ export default {
             toggleSidebar,
             showSidebar,
             hideSidebar,
-            handleLogout
+            handleLogout,
+            activePath, 
         };
     }
 };
@@ -187,6 +200,10 @@ export default {
 
 .sidebar-item:hover {
     background-image: linear-gradient(0deg, #ffeef1b1 0%, #e2eeffa9 95%, #e1edfe9c 100%);
+}
+
+.sidebar-item.active {
+    background-image: linear-gradient(0deg, #ffe5ebd5 0%, #dbe8fac4 95%, #e3eefebd 100%);
 }
 
 .icon {
