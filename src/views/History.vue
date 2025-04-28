@@ -25,15 +25,14 @@
         </div>
 
         <div v-if="isLoading" class="loading-state">
-            <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo" style="opacity: 0.6; padding-right: 3px;">
             <div class=" no-cards-text card-description">
-                <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
+                <p style="font-size: 25px;letter-spacing:2px;opacity: 0.4;margin-top: -12px;">加载中...</p>
             </div>
         </div>
         <div v-else-if="cards.length === 0" class="no-cards">
             <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
             <div class="no-cards-text card-description">
-                <p>这天没有卡片生成哦</p>
+                <p>本日没有生成卡片哦</p>
             </div>
         </div>
         <div v-else>
