@@ -6,6 +6,7 @@ import History from '../views/History.vue';
 import Settings from '../views/Settings.vue';
 import Login from '../components/Login.vue';
 import Register from '../components/Register.vue';
+import NotFound from '../views/404.vue';
 
 const routes = [
     {
@@ -37,6 +38,16 @@ const routes = [
         path: '/register',
         name: 'Register',
         component: Register,
+    },
+    {
+        path: '/404',
+        name: 'NotFound',
+        component: NotFound,
+    },
+    {
+        path: '/:catchAll(.*)',
+        name: 'NotFound',
+        component: NotFound,
     },
 ];
 

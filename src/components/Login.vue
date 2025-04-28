@@ -139,7 +139,7 @@ export default {
                         setCookie('username', this.username, days);
                         setCookie('encryptedPassword', encryptedPassword, days);
                         setCookie('user_id', responseData.user_id.toString(), days);
-                        setCookie('avatar', responseData.img, days);
+                        setCookie('avatar', responseData.avatar, days);
 
                         
                         this.updateSidebar(this.username, responseData.user_id);
