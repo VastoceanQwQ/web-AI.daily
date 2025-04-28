@@ -103,10 +103,12 @@
                                 <el-switch v-model="card.generateImage" />
                             </el-form-item>
                             <el-form-item label="城市">
-                                <el-input v-model="card.city" placeholder="IP或城市任填一个" />
+                                <el-input v-model="card.city" placeholder="IP或城市必填一项"
+                                    :class="{ 'required-field': !card.city && !card.ip }" />
                             </el-form-item>
                             <el-form-item label="IP">
-                                <el-input v-model="card.ip" placeholder="如不能自动获取，可手动输入" />
+                                <el-input v-model="card.ip" placeholder="如不能自动获取，可手动输入"
+                                    :class="{ 'required-field': !card.city && !card.ip }" />
                                 <el-button @click="getIP(index)" :loading="card.ipLoading">获取IP</el-button>
                             </el-form-item>
                             <el-form-item label="更多需求">
@@ -127,9 +129,9 @@
                             <el-form-item label=" 生成图片">
                                 <el-switch v-model="card.generateImage" />
                             </el-form-item>
-                            <el-form-item label="类型关键词">
+                            <el-form-item label="新闻类型">
                                 <el-input v-model="card.typeKeywords" :class="{ 'required-field': !card.typeKeywords }"
-                                    placeholder="必填" />
+                                    placeholder="必填，如“科技”" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'health'">
@@ -159,7 +161,7 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="喜爱偏向">
-                                <el-input v-model="card.preference" placeholder="选填" />
+                                <el-input v-model="card.preference" placeholder="选填，如“民谣”" />
                             </el-form-item>
                         </div>
                         <div v-else-if="card.type === 'traffic'">
@@ -174,16 +176,19 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="起始地">
-                                <el-input v-model="card.start" placeholder="起始地或定位位置任填一个" />
+                                <el-input v-model="card.start" placeholder="起始地或定位位置必填一项"
+                                    :class="{ 'required-field': !card.start && !card.location }" />
+                            </el-form-item>
+                            <el-form-item label="经纬度位置">
+                                <el-input v-model="card.location" placeholder="如不能自动获取，可手动输入"
+                                    :class="{ 'required-field': !card.start && !card.location }" />
+                                <el-button @click="getLocation(index)" :loading="card.locationLoading">获取位置</el-button>
                             </el-form-item>
                             <el-form-item label="目的地">
                                 <el-input v-model="card.destination" placeholder="必填"
                                     :class="{ 'required-field': !card.destination }" />
                             </el-form-item>
-                            <el-form-item label="经纬度位置">
-                                <el-input v-model="card.location" placeholder="如不能自动获取，可手动输入" />
-                                <el-button @click="getLocation(index)" :loading="card.locationLoading">获取位置</el-button>
-                            </el-form-item>
+
                         </div>
                         <div v-else-if="card.type === 'fortune'">
                             <h2>🔮 运势</h2>
@@ -214,8 +219,8 @@
                                 <el-input placeholder="选填，留空则不展示头图" v-model="card.headerImageLink" />
                             </el-form-item>
                             <el-form-item label="正文内容">
-                                <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 2, maxRows: 6 }"
-                                    placeholder="必填，可使用markdown语法填写文本。第一行使用 # 为开头则可作为卡片标题"
+                                <el-input type="textarea" v-model="card.content" :autosize="{ minRows: 4, maxRows: 6 }"
+                                    placeholder="必填，可使用Markdown语法填写文本，将自动转译。第一行使用 # 为开头则可作为卡片标题"
                                     :class="{ 'required-field': !card.content }" />
                             </el-form-item>
                         </div>
@@ -224,7 +229,7 @@
                             <el-form-item label="需求">
                                 <el-input type="textarea" v-model="card.requirement"
                                     :autosize="{ minRows: 4, maxRows: 6 }"
-                                    placeholder="必填，请用自然语言描述需求，Agent将根据您的需求自动生成内容"
+                                    placeholder="必填，请用自然语言描述需求，Agent将根据您的需求智能生成内容"
                                     :class="{ 'required-field': !card.requirement }" />
                             </el-form-item>
                         </div>
@@ -337,7 +342,7 @@ export default {
         beforeUnloadHandler(event) {
             if (this.isDirty) {
                 event.preventDefault();
-                event.returnValue = '您有未保存的更改，确定要离开吗？'; 
+                event.returnValue = '您有未保存的更改，确定要离开吗？';
             }
         },
         getEmoji(type) {
@@ -377,7 +382,7 @@ export default {
             if (this.cards.length === 0) {
                 return;
             }
-          
+
             this.cards.forEach((card) => {
                 let relevantParams = {};
                 switch (card.type) {
@@ -463,7 +468,7 @@ export default {
                     card_number: card.card_number,
                     data: JSON.stringify({
                         ...relevantParams,
-                        card_number: card.card_number 
+                        card_number: card.card_number
                     })
                 };
 
@@ -471,7 +476,7 @@ export default {
                 axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496722349124993061', 
+                        workflow_id: '7496722349124993061',
                         parameters: {
                             user_id: getCookie('user_id'),
                             card_id: cardData.card_id,
@@ -554,7 +559,7 @@ export default {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index - 1];
                 this.cards[index - 1] = temp;
-               
+
                 this.cards.forEach((card, i) => {
                     card.card_number = i + 1;
                 });
@@ -566,7 +571,7 @@ export default {
                 const temp = this.cards[index];
                 this.cards[index] = this.cards[index + 1];
                 this.cards[index + 1] = temp;
-                
+
                 this.cards.forEach((card, i) => {
                     card.card_number = i + 1;
                 });
@@ -575,7 +580,7 @@ export default {
 
         deleteCard(index) {
             this.cards.splice(index, 1);
-            
+
             this.cards.forEach((card, i) => {
                 card.card_number = i + 1;
             });
@@ -592,7 +597,7 @@ export default {
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496712396578783282', 
+                        workflow_id: '7496712396578783282',
                         parameters: {
                             user_id: user_id
                         }
@@ -610,7 +615,7 @@ export default {
                     this.cards = responseData.cards.map(card => {
 
                         const cardData = JSON.parse(card.data);
-                        
+
                         return {
                             card_id: card.card_id,
                             type: card.data_type,
@@ -658,7 +663,7 @@ export default {
                 const response = await axios.post(
                     this.timeApiUrl,
                     {
-                        workflow_id: '7494504516701274162', 
+                        workflow_id: '7494504516701274162',
                         parameters: {
                             user_id: getCookie('user_id'),
                             time: "0 0 0 * * *"
@@ -676,7 +681,7 @@ export default {
                     this.generateTime = '';
                 }
                 else if (responseData.code === 3) {
-                    
+
                     this.generateTime = this.convertCronToTime(responseData.time);
                     if (this.generateTime === '00:00') {
                         this.generateTime = '';
@@ -689,14 +694,14 @@ export default {
             }
         },
 
-       
+
         async getIP(index) {
             let card = this.cards[index];
-            card.ipLoading = true; 
+            card.ipLoading = true;
             try {
                 const response = await axios.get('https://qifu-api.baidubce.com/ip/local/geo/v1/district');
                 if (response.data.ip) {
-                    card.ip = response.data.ip; 
+                    card.ip = response.data.ip;
                     ElMessage.success('IP 获取成功');
                 } else {
                     ElMessage.error('无法获取 IP 地址');
@@ -705,17 +710,17 @@ export default {
                 console.error('获取 IP 失败:', error);
                 ElMessage.error('获取 IP 失败，请检查网络连接');
             } finally {
-                card.ipLoading = false; 
+                card.ipLoading = false;
             }
         },
 
-        
+
         async getLocation(index) {
             let card = this.cards[index];
-            card.locationLoading = true; 
+            card.locationLoading = true;
             if (!navigator.geolocation) {
                 ElMessage.error('您的浏览器不支持获取地理位置');
-                card.locationLoading = false; 
+                card.locationLoading = false;
                 return;
             }
 
@@ -725,19 +730,19 @@ export default {
                 });
 
                 const { latitude, longitude } = position.coords;
-                card.location = `${latitude},${longitude}`; 
+                card.location = `${latitude},${longitude}`;
                 ElMessage.success('定位获取成功');
             } catch (error) {
                 console.error('获取定位失败:', error);
                 ElMessage.error('获取定位失败，请检查权限设置');
             } finally {
-                card.locationLoading = false; 
+                card.locationLoading = false;
             }
         },
 
         async saveGenerateTime() {
             try {
-                
+
                 const [hour, minute] = this.generateTime.split(':');
                 const cronTime = `0 ${minute} ${hour} * * *`;
 
@@ -768,7 +773,7 @@ export default {
                 console.error('生成时间保存失败');
             }
         },
-        
+
         async deleteCardsFromServer(deletedCardIds) {
             const user_id = getCookie('user_id');
             if (!user_id) {
@@ -781,7 +786,7 @@ export default {
                     const response = await axios.post(
                         `https://api.coze.cn/v1/workflow/run`,
                         {
-                            workflow_id: '7496749965827014719', 
+                            workflow_id: '7496749965827014719',
                             parameters: {
                                 card_id: cardId
                             }
@@ -807,20 +812,23 @@ export default {
         },
 
         async manualSave() {
-            if (this.loading) return; 
+            if (this.loading) return;
 
             if (!this.generateTime) {
                 ElMessage.warning('请设置生成时间');
                 return;
             }
 
-            
             const missingRequiredFields = [];
             this.cards.forEach((card, index) => {
                 switch (card.type) {
                     case 'weather':
                         if (!card.requirement) {
                             missingRequiredFields.push({ index, field: 'requirement' });
+                        }
+                        // 新增：校验城市和IP是否至少填写一个
+                        if (!card.city && !card.ip) {
+                            missingRequiredFields.push({ index, field: 'cityOrIp' });
                         }
                         break;
                     case 'news':
@@ -831,6 +839,9 @@ export default {
                     case 'traffic':
                         if (!card.destination) {
                             missingRequiredFields.push({ index, field: 'destination' });
+                        }
+                        if (!card.start && !location) {
+                            missingRequiredFields.push({ index, field: 'startOrlocation' });
                         }
                         break;
                     case 'health':
@@ -855,9 +866,20 @@ export default {
 
             if (missingRequiredFields.length > 0) {
                 ElMessage.warning('请填写所有必填参数');
-                
+
                 missingRequiredFields.forEach(({ index, field }) => {
-                    this.$set(this.cards[index], `${field}Error`, true);
+                    if (field === 'cityOrIp') {
+                        // 标记城市和IP字段为必填
+                        this.$set(this.cards[index], 'cityError', true);
+                        this.$set(this.cards[index], 'ipError', true);
+                    }
+                    else if (field === 'startOrlocation') {
+                        this.$set(this.cards[index], 'startError', true);
+                        this.$set(this.cards[index], 'locationError', true);
+                    }
+                    else {
+                        this.$set(this.cards[index], `${field}Error`, true);
+                    }
                 });
                 return;
             }
@@ -865,20 +887,17 @@ export default {
             this.loading = true;
 
             try {
-                
-                const localCardIds = this.cards.map(card => card.card_id); 
-                const serverCardIds = await this.fetchServerCardIds(); 
+                const localCardIds = this.cards.map(card => card.card_id);
+                const serverCardIds = await this.fetchServerCardIds();
 
-                
                 const deletedCardIds = serverCardIds.filter(id => !localCardIds.includes(id));
 
                 console.log('deletedCardIds:', deletedCardIds);
 
-                
                 await this.deleteCardsFromServer(deletedCardIds);
 
-                await this.saveGenerateTime(); 
-                await this.saveChanges(); 
+                await this.saveGenerateTime();
+                await this.saveChanges();
                 ElMessage.success('保存成功');
             } catch (error) {
                 console.error('Error during manual save:', error);
@@ -887,7 +906,7 @@ export default {
                 this.loading = false;
             }
         },
-        
+
         async fetchServerCardIds() {
             const user_id = getCookie('user_id');
             if (!user_id) {
@@ -899,7 +918,7 @@ export default {
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496712396578783282', 
+                        workflow_id: '7496712396578783282',
                         parameters: {
                             user_id: user_id
                         }
@@ -925,7 +944,7 @@ export default {
             }
         },
 
-        
+
         scrollToTop() {
             window.scrollTo({
                 top: 0,
@@ -935,8 +954,8 @@ export default {
     },
     mounted() {
         this.fetchCards();
-        this.fetchGenerateTime(); 
-        window.addEventListener('beforeunload', this.beforeUnloadHandler); 
+        this.fetchGenerateTime();
+        window.addEventListener('beforeunload', this.beforeUnloadHandler);
 
         const loadingInstance = ElLoading.service({
             lock: true,
@@ -945,7 +964,7 @@ export default {
             customClass: 'custom-loading'
         });
 
-        
+
         const sr = ScrollReveal({
             origin: 'bottom',
             distance: '10px',
@@ -953,21 +972,21 @@ export default {
             delay: 0,
             reset: false,
             mobile: true,
-            opacity: 0.001, 
+            opacity: 0.001,
             easing: 'cubic-bezier(0.5, 0, 0, 1)',
             scale: 0.9,
         });
 
-        
+
         sr.reveal('.left-panel .card', {
             interval: 100,
-            opacity: 1, 
+            opacity: 1,
         });
 
         this.fetchCards().then(() => {
             this.fetchGenerateTime().then(() => {
-                loadingInstance.close(); 
-                
+                loadingInstance.close();
+
                 setTimeout(() => {
                     this.loadingState = false;
                 }, 1000);
@@ -1330,7 +1349,7 @@ button:hover {
 }
 
 .card-id-display {
-    position:absolute;
+    position: absolute;
     top: 28px;
     right: 95px;
     font-size: 14px;
@@ -1339,8 +1358,8 @@ button:hover {
     font-weight: 600;
     background-color: #00000000;
 }
-.card-id-display :hover{
+
+.card-id-display :hover {
     color: #454545;
 }
-
 </style>

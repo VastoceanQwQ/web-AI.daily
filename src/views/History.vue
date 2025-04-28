@@ -1,28 +1,39 @@
 <!-- src/views/History.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <div style="margin-bottom: 20px;">
-            <label for="date-selector">选择日期：</label>
-            <input type="date" id="date-selector" v-model="selectedDate" @change="fetchCardsByDate">
+        <!-- 新增日期选择器按钮 -->
+        <div class="date-picker-container">
+            <!-- 新增上一天按钮 -->
+            <button class=" square-button" @click="goToPreviousDay" :disabled="isFirstDay">
+                <img src="/public/left.svg" alt="上一天" class="icon1" />
+            </button>
+            <button class="date-picker-button" @click="toggleDatePicker">
+                {{ formatDate(selectedDate, true) }}
+            </button>
+            <!-- 新增下一天按钮 -->
+            <button class=" square-button" @click="goToNextDay" :disabled="isLastDay">
+                <img src="/public/right.svg" alt="下一天" class="icon1" />
+            </button>
+            <transition name="fade">
+                <div v-if="showDatePicker" class="date-picker-menu">
+                    <button v-for="(date, index) in pastDates" :key="index" class="date-picker-item"
+                        @click="selectDate(date)">
+                        {{ formatDate(date, false) }}
+                    </button>
+                </div>
+            </transition>
         </div>
 
         <div v-if="isLoading" class="loading-state">
-            <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo"
-                style="opacity: 0.6; padding-right: 3px;">
+            <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo" style="opacity: 0.6; padding-right: 3px;">
             <div class=" no-cards-text card-description">
                 <p style="font-size: 25px;letter-spacing:5px;opacity: 0.4;margin-top: -12px;">晨析智报</p>
-            </div>
-        </div>
-        <div v-else-if="cards.length === 0 && hasCardsSet" class="no-cards">
-            <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
-            <div class="no-cards-text card-description">
-                <p>没有找到相关卡片</p>
             </div>
         </div>
         <div v-else-if="cards.length === 0" class="no-cards">
             <img src="/public/neko01.png" alt="Add Cards" class="no-cards-image">
             <div class="no-cards-text card-description">
-                <p>还没有历史卡片哦</p>
+                <p>这天没有卡片生成哦</p>
             </div>
         </div>
         <div v-else>
@@ -40,20 +51,23 @@
                         <img v-else src="/public/down.svg" alt="展开" class="icon1" />
                     </button>
                 </div>
-                <div v-if="cards.length > 0" class="card" :key="'footer'" style="text-align: center; font-size: 14px; color: #999;">
+                <div v-if="cards.length > 0" class="card" :key="'footer'"
+                    style="text-align: center; font-size: 14px; color: #999;">
                     <div class="card-content">
                         <p>本站部分文本由AI生成，请注意甄别。</p>
-                        <p>Powered by <a href="https://ai-daily.vastocean.work/" target="_blank">AI-Daily</a>. Made by Vastocean & 2 coder.</p>
+                        <p>Powered by <a href="https://ai-daily.vastocean.work/" target="_blank">AI-Daily</a>. Made by
+                            Vastocean & 2 coder.</p>
                     </div>
                 </div>
             </transition-group>
             <div class="upper-main"></div>
         </div>
     </div>
+    <fixed-buttons v-if="cards.length > 0" :main-place-ref="mainPlace" :cards="cards" id="buttons"></fixed-buttons>
 </template>
 
 <script>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import MarkdownIt from 'markdown-it';
 import FixedButtons from '../components/FixedButtons.vue';
 import scrollReveal from 'scrollreveal';
@@ -68,7 +82,7 @@ export default {
     },
     setup() {
         const sr = ref(null);
-        const themeColors = {
+        const themeColors = ref({
             weather: '#fff3bf',
             fortune: '#e5dbff',
             news: '#fcc2d7',
@@ -80,13 +94,78 @@ export default {
             economy: '#ffdeeb',
             calendar: '#d0ebff',
             customAI: '#ced4da'
-        };
+        });
 
         const cards = ref([]);
         const isExpanded = ref([]);
         const isLoading = ref(true);
         const hasCardsSet = ref(false);
         const selectedDate = ref(new Date().toISOString().split('T')[0]); // 默认选中今天
+        const showDatePicker = ref(false); // 新增状态变量
+        const pastDates = ref([]); // 新增过去7天的日期选项
+
+        // 修改方法：生成过去7天的日期选项
+        const generatePastDates = () => {
+            const dates = [];
+            for (let i = 0; i < 8; i++) { // 从昨天开始，不包含当天
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            // 按日期从小到大排序
+            pastDates.value = dates.sort((a, b) => new Date(a) - new Date(b));
+        };
+
+        // 新增方法：切换日期选择器菜单的显示状态
+        const toggleDatePicker = () => {
+            showDatePicker.value = !showDatePicker.value;
+        };
+
+        // 新增方法：选择某个日期并重新加载卡片数据
+        const selectDate = (date) => {
+            selectedDate.value = date;
+            showDatePicker.value = false;
+            fetchCardsByDate();
+        };
+
+        // 修改方法：格式化日期
+        const formatDate = (date, includeYear = true) => {
+            const [year, month, day] = date.split('-');
+            if (includeYear) {
+                return `${year}-${month}-${day}`;
+            } else {
+                return `${month}-${day}`;
+            }
+        };
+
+        // 新增方法：跳转到上一天
+        const goToPreviousDay = () => {
+            const currentDate = new Date(selectedDate.value);
+            currentDate.setDate(currentDate.getDate() - 1);
+            selectedDate.value = currentDate.toISOString().split('T')[0];
+            fetchCardsByDate();
+        };
+
+        // 新增方法：跳转到下一天
+        const goToNextDay = () => {
+            const currentDate = new Date(selectedDate.value);
+            currentDate.setDate(currentDate.getDate() + 1);
+            selectedDate.value = currentDate.toISOString().split('T')[0];
+            fetchCardsByDate();
+        };
+
+        // 新增计算属性：判断是否为最后一天
+        const isLastDay = computed(() => {
+            const today = new Date().toISOString().split('T')[0];
+            return selectedDate.value === today;
+        });
+
+        // 新增计算属性：判断是否为最前一天
+        const isFirstDay = computed(() => {
+            const firstDay = new Date();
+            firstDay.setDate(firstDay.getDate() - 7);
+            return selectedDate.value === firstDay.toISOString().split('T')[0];
+        });
 
         const initExpandedState = () => {
             isExpanded.value = cards.value.map(() => false);
@@ -102,22 +181,27 @@ export default {
 
         // 根据日期获取卡片数据
         const fetchCardsByDate = async () => {
-            const user_id = getCookie('user_id') || 'fc08b2f5-dbe8-4aaa-a842-417e5238ee87'; 
+            const user_id = getCookie('user_id');
             try {
+                isLoading.value = true; // 开始加载状态
+                // 根据用户选择的日期生成查询范围
                 const startDate = new Date(selectedDate.value);
                 const endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 7); // 获取7天内的数据
+                endDate.setDate(endDate.getDate() + 1); // 查询范围改为单日
 
-                const formattedStartDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')} 00:00:00`;
-                const formattedEndDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')} 23:59:59`;
+                // 格式化日期，增加毫秒部分
+                const formattedStartDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')} 00:00:00.000`;
+                const formattedEndDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')} 00:00:00.000`;
 
+                // 调用API获取卡片数据
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
-                        workflow_id: '7496415888914087988',
+                        workflow_id: '7498211665830838282',
                         parameters: {
                             user_id: user_id,
-                            start_time: formattedStartDate
+                            start_time: formattedStartDate,
+                            end_time: formattedEndDate,
                         }
                     },
                     {
@@ -128,27 +212,45 @@ export default {
                     }
                 );
 
+                // 解析API返回的数据
                 const responseData = JSON.parse(response.data.data);
+                console.log('Parsed API Response:', responseData);
 
                 if (responseData.code === 1) {
-                    cards.value = responseData.output.map(card => {
-                        return {
-                            card_type: card.card_type || '',
-                            content: card.card_content || '',
-                            headerImage: card.card_top_img || ''
-                        };
-                    });
-                    initExpandedState();
+                    // 确保API返回的数据格式正确
+                    if (Array.isArray(responseData.output)) {
+                        // 将API返回的卡片数据映射为前端需要的格式
+                        cards.value = responseData.output.map(card => {
+                            return {
+                                card_type: card.card_type,
+                                content: card.card_content,
+                                headerImage: card.card_top_img
+                            };
+                        });
+                        initExpandedState(); // 确保 isExpanded 状态被正确初始化
+                        hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                        console.log(101);
+                    } else {
+                        console.error('Invalid data format:', responseData.output);
+                        cards.value = []; // 清空卡片数据
+                        hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                    }
                 } else {
                     console.error('Failed to fetch cards:', responseData.msg);
+                    cards.value = []; // 清空卡片数据
+                    hasCardsSet.value = true; // 更新 hasCardsSet 状态
                 }
             } catch (error) {
                 console.error('Error fetching cards:', error);
+                cards.value = []; // 清空卡片数据
+                hasCardsSet.value = true; // 更新 hasCardsSet 状态
             } finally {
-                isLoading.value = false;
+                isLoading.value = false; // 数据加载完成，关闭加载状态
+                console.log(102);
                 nextTick(() => {
-                    retScroll();
+                    retScroll(); // 调用 scrollReveal 动画
                 });
+                console.log(103);
             }
         };
 
@@ -188,6 +290,7 @@ export default {
         };
 
         onMounted(async () => {
+            generatePastDates(); // 初始化过去7天的日期选项
             await fetchCardsByDate();
             retScroll();
         });
@@ -203,7 +306,17 @@ export default {
             isLoading,
             hasCardsSet,
             selectedDate,
-            fetchCardsByDate
+            fetchCardsByDate,
+            showDatePicker,
+            pastDates,
+            toggleDatePicker,
+            selectDate,
+            formatDate,
+            goToPreviousDay,
+            goToNextDay,
+            isLastDay,
+            isFirstDay,
+            themeColors // 确保 themeColors 被返回，以便在模板中使用
         };
     },
 };
@@ -460,4 +573,127 @@ export default {
 .expand-button:hover {
     background-color: #e0e0e031;
 }
+
+/* 新增样式：日期选择器容器 */
+.date-picker-container {
+    position: fixed;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* 调整按钮间距 */
+    user-select: none;
+}
+
+/* 修改样式：正方形按钮 */
+.square-button {
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border-radius: 12px;
+    background-image: linear-gradient(0deg, #eedde077 0%, #d7e6fc6d 95%, #d3e2f868 100%);
+    color: rgb(0, 0, 0);
+    border: 1.5px solid #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0px 3px 10px rgba(97, 97, 97, 0.2);
+    break-inside: avoid;
+    opacity: 1;
+}
+
+.square-button:hover {
+    background-image: linear-gradient(0deg, #eedde0 0%, #d7e6fc 95%, #d3e2f8 100%);
+    border-color: #74c8ff;
+}
+
+/* 修改样式：日期选择器按钮 */
+.date-picker-button {
+    width: 150px;
+    height: 35px;
+    border-radius: 12px;
+    background-image: linear-gradient(0deg, #eedde0 0%, #d7e6fc 95%, #d3e2f8 100%);
+    color: rgb(0, 0, 0);
+    border: 1.5px solid #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0px 3px 10px rgba(98, 98, 98, 0.2);
+    break-inside: avoid;
+    opacity: 1;
+}
+
+.date-picker-button:hover {
+    background-image: linear-gradient(0deg, #f4d5da 0%, #c3d8f7 99%, #b6d2f8 100%);
+    border-color: #0199ff;
+}
+
+/* 修改样式：日期选择器二级菜单 */
+.date-picker-menu {
+    position: absolute;
+    top: 43px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 450px;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(137, 137, 137, 0.6);
+    z-index: 1001;
+    padding: 2px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0px 2px 10px rgba(216, 216, 216, 0.25);
+    backdrop-filter: blur(7.5px);
+    display: flex;
+    justify-content: space-between;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* 修改样式：日期选择器菜单项 */
+.date-picker-item {
+    width: 50px;
+    height: 30px;
+    border-radius: 12px;
+    background-image: linear-gradient(0deg, #e2e2e2 0%, #d6d6d6 99%, #ababab 100%);
+    color: rgb(0, 0, 0);
+    border: 1.5px solid #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+    font-size: 12px;
+}
+
+.date-picker-item:hover {
+    background-image: linear-gradient(0deg, #eeeeee 0%, #dfdfdf 99%, #a7a7a7 100%);
+    border-color: #909090;
+}
+
+/* 新增样式：日期选择器按钮图标 */
+.icon1 {
+    width: 12px;
+    height: 12px;
+    margin-bottom: -2px;
+    filter: brightness(3) invert(1);
+}
 </style>
+

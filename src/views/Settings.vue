@@ -79,7 +79,7 @@
                 <div v-else-if="activeTab === 'about'">
                     <h2 style="margin-bottom: 20px;margin-top: 10px; margin-left: 5px;">关于</h2>
                     <img src="@/assets/img/logo.png" alt="Logo" class="loading-logo"
-                        style="opacity: 1; margin-left: 245px; margin-bottom: 10px;">
+                        style="opacity: 1; margin-left: 248px; margin-bottom: 10px; margin-top: 35px;">
                     <div class=" no-cards-text card-description">
                         <p style="font-size: 25px;letter-spacing:5px;opacity: 0.8;">晨析智报</p>
                         <p style="font-size: 15px;opacity: 0.8; margin-top: 5px;">
