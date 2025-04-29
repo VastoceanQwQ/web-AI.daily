@@ -488,7 +488,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 ).then(response => {
@@ -605,7 +605,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -672,7 +672,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -758,7 +758,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -794,7 +794,7 @@ export default {
                         {
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                                'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                             }
                         }
                     );
@@ -926,7 +926,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );

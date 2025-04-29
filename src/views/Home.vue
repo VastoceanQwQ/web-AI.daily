@@ -134,7 +134,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -176,7 +176,7 @@ export default {
                         {
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                                'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                             }
                         }
                     );
@@ -201,7 +201,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -233,7 +233,7 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
@@ -605,13 +605,20 @@ export default {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    top: 50px;
+    top: 4%;
 
     font-size: 15px;
-    color: #636363;
+    color: #000000;
     opacity: 0.7;
     text-align: center;
     font-weight: bolder;
     user-select: none;
+
+    border-radius: 8px;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
+    background-image: linear-gradient(0deg, #ffffffcb 0%, #c8e6fd 100%);
+    border: 1.5px solid #74c0fc;
+    padding: 5px 15px;
 }
 </style>

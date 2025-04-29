@@ -96,10 +96,10 @@
 
 <script>
 import axios from 'axios';
-import CryptoJS from 'crypto-js'; // 引入CryptoJS库
-import { ElMessage } from 'element-plus'; // 引入ElMessage
+import CryptoJS from 'crypto-js'; 
+import { ElMessage } from 'element-plus'; 
 import { Loading } from 'element-plus/es/components/loading/src/service';
-import ScrollReveal from 'scrollreveal'; // 引入ScrollReveal
+import ScrollReveal from 'scrollreveal'; 
 
 export default {
     name: 'Settings',
@@ -119,7 +119,7 @@ export default {
                 confirmPasswordDisabled: true,
                 isLoading: false,
             },
-            api_token: 'pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu',
+            api_token: 'pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum',
             isLoggingOut: false,
         };
     },
@@ -203,8 +203,7 @@ export default {
                 ElMessage.error(errorMessages.join('\n'));
                 return;
             }
-
-            // 先将当前保存的字段值存储到 cookie 中
+            
             if (field === 'username') {
                 this.setCookie('username', this.accountForm.username, 30 * 24 * 60 * 60 * 1000);
             }
@@ -215,13 +214,11 @@ export default {
             if (field === 'avatar') {
                 this.setCookie('avatar', this.accountForm.avatarUrl, 30 * 24 * 60 * 60 * 1000);
             }
-
-            // 从 cookie 中读取所有字段的值
+            
             const username = this.getCookie('username');
             const password = this.getCookie('password');
             const avatarUrl = this.getCookie('avatar');
-
-            // 修改请求参数，确保符合API要求
+            
             const requestData = {
                 workflow_id: '7496047468724469770',
                 parameters: {
@@ -240,7 +237,6 @@ export default {
                         'Authorization': `Bearer ${this.api_token}`
                     }
                 }).then(response => {
-                    // 解析 JSON 字符串
                     let responseData;
                     try {
                         responseData = JSON.parse(response.data.data);
@@ -253,7 +249,6 @@ export default {
                     console.log('Parsed API Response:', responseData);
 
                     if (responseData.code === 1) {
-                        // 保存成功
                         ElMessage.success('保存成功');
 
                         setTimeout(() => {
@@ -261,7 +256,6 @@ export default {
                             //this.$router.push('/');
                         }, 1500);
                     } else {
-                        // 保存失败
                         ElMessage.error(`保存失败: ${responseData.msg || '未知错误'}`);
                     }
                 }).catch(error => {

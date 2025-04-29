@@ -1,16 +1,13 @@
 <!-- src/views/History.vue -->
 <template>
     <div class="main-place" ref="mainPlace">
-        <!-- 新增日期选择器按钮 -->
         <div class="date-picker-container">
-            <!-- 新增上一天按钮 -->
             <button class=" square-button" @click="goToPreviousDay" :disabled="isFirstDay">
                 <img src="/public/left.svg" alt="上一天" class="icon1" />
             </button>
             <button class="date-picker-button" @click="toggleDatePicker">
                 {{ formatDate(selectedDate, true) }}
             </button>
-            <!-- 新增下一天按钮 -->
             <button class=" square-button" @click="goToNextDay" :disabled="isLastDay">
                 <img src="/public/right.svg" alt="下一天" class="icon1" />
             </button>
@@ -100,34 +97,31 @@ export default {
         const isLoading = ref(true);
         const hasCardsSet = ref(false);
         const selectedDate = ref(new Date().toISOString().split('T')[0]); // 默认选中今天
-        const showDatePicker = ref(false); // 新增状态变量
-        const pastDates = ref([]); // 新增过去7天的日期选项
+        const showDatePicker = ref(false); 
+        const pastDates = ref([]); 
 
-        // 修改方法：生成过去7天的日期选项
+        
         const generatePastDates = () => {
             const dates = [];
-            for (let i = 0; i < 8; i++) { // 从昨天开始，不包含当天
+            for (let i = 0; i < 8; i++) { 
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 dates.push(date.toISOString().split('T')[0]);
             }
-            // 按日期从小到大排序
+            
             pastDates.value = dates.sort((a, b) => new Date(a) - new Date(b));
         };
-
-        // 新增方法：切换日期选择器菜单的显示状态
+       
         const toggleDatePicker = () => {
             showDatePicker.value = !showDatePicker.value;
         };
-
-        // 新增方法：选择某个日期并重新加载卡片数据
+        
         const selectDate = (date) => {
             selectedDate.value = date;
             showDatePicker.value = false;
             fetchCardsByDate();
         };
-
-        // 修改方法：格式化日期
+       
         const formatDate = (date, includeYear = true) => {
             const [year, month, day] = date.split('-');
             if (includeYear) {
@@ -136,30 +130,26 @@ export default {
                 return `${month}-${day}`;
             }
         };
-
-        // 新增方法：跳转到上一天
+       
         const goToPreviousDay = () => {
             const currentDate = new Date(selectedDate.value);
             currentDate.setDate(currentDate.getDate() - 1);
             selectedDate.value = currentDate.toISOString().split('T')[0];
             fetchCardsByDate();
         };
-
-        // 新增方法：跳转到下一天
+       
         const goToNextDay = () => {
             const currentDate = new Date(selectedDate.value);
             currentDate.setDate(currentDate.getDate() + 1);
             selectedDate.value = currentDate.toISOString().split('T')[0];
             fetchCardsByDate();
         };
-
-        // 新增计算属性：判断是否为最后一天
+       
         const isLastDay = computed(() => {
             const today = new Date().toISOString().split('T')[0];
             return selectedDate.value === today;
         });
 
-        // 新增计算属性：判断是否为最前一天
         const isFirstDay = computed(() => {
             const firstDay = new Date();
             firstDay.setDate(firstDay.getDate() - 7);
@@ -182,17 +172,15 @@ export default {
         const fetchCardsByDate = async () => {
             const user_id = getCookie('user_id');
             try {
-                isLoading.value = true; // 开始加载状态
-                // 根据用户选择的日期生成查询范围
+                isLoading.value = true;
+
                 const startDate = new Date(selectedDate.value);
                 const endDate = new Date(startDate);
-                endDate.setDate(endDate.getDate() + 1); // 查询范围改为单日
-
-                // 格式化日期，增加毫秒部分
+                endDate.setDate(endDate.getDate() + 1); 
+                
                 const formattedStartDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')} 00:00:00.000`;
                 const formattedEndDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')} 00:00:00.000`;
 
-                // 调用API获取卡片数据
                 const response = await axios.post(
                     `https://api.coze.cn/v1/workflow/run`,
                     {
@@ -206,19 +194,16 @@ export default {
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer pat_Q2vDsDSZEeW1d3VcqVS06CVKMhYcjTWBSnSygLitFYyhAc8jy5dKzLdAsgS8YkLu`
+                            'Authorization': `Bearer pat_kxaimeTxC6QbMo4K9N0VOzTS7LFzS9HV1yPkfpe5f8yLEboKwSrcV1Gwhynixuum`
                         }
                     }
                 );
-
-                // 解析API返回的数据
+                
                 const responseData = JSON.parse(response.data.data);
                 console.log('Parsed API Response:', responseData);
 
                 if (responseData.code === 1) {
-                    // 确保API返回的数据格式正确
                     if (Array.isArray(responseData.output)) {
-                        // 将API返回的卡片数据映射为前端需要的格式
                         cards.value = responseData.output.map(card => {
                             return {
                                 card_type: card.card_type,
@@ -226,28 +211,28 @@ export default {
                                 headerImage: card.card_top_img
                             };
                         });
-                        initExpandedState(); // 确保 isExpanded 状态被正确初始化
-                        hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                        initExpandedState(); 
+                        hasCardsSet.value = true; 
                         console.log(101);
                     } else {
                         console.error('Invalid data format:', responseData.output);
-                        cards.value = []; // 清空卡片数据
-                        hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                        cards.value = [];
+                        hasCardsSet.value = true; 
                     }
                 } else {
                     console.error('Failed to fetch cards:', responseData.msg);
-                    cards.value = []; // 清空卡片数据
-                    hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                    cards.value = []; 
+                    hasCardsSet.value = true; 
                 }
             } catch (error) {
                 console.error('Error fetching cards:', error);
-                cards.value = []; // 清空卡片数据
-                hasCardsSet.value = true; // 更新 hasCardsSet 状态
+                cards.value = []; 
+                hasCardsSet.value = true; 
             } finally {
-                isLoading.value = false; // 数据加载完成，关闭加载状态
+                isLoading.value = false; 
                 console.log(102);
                 nextTick(() => {
-                    retScroll(); // 调用 scrollReveal 动画
+                    retScroll(); 
                 });
                 console.log(103);
             }
@@ -289,7 +274,7 @@ export default {
         };
 
         onMounted(async () => {
-            generatePastDates(); // 初始化过去7天的日期选项
+            generatePastDates(); 
             await fetchCardsByDate();
             retScroll();
         });
@@ -315,7 +300,7 @@ export default {
             goToNextDay,
             isLastDay,
             isFirstDay,
-            themeColors // 确保 themeColors 被返回，以便在模板中使用
+            themeColors 
         };
     },
 };

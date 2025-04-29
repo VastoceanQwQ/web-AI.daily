@@ -85,7 +85,6 @@ export default {
             eventBus.on('refreshSidebar', refreshSidebar);
         });
 
-        // 监听路由变化，动态更新 activePath
         watch(
             () => route.path,
             (newPath) => {
