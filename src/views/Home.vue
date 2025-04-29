@@ -1,9 +1,11 @@
 <!-- src/views/Home.vue -->
 <template>
-    <div class="top-text" v-if="!isLoading">
+    <div class="top-text" v-if="!isLoading && !isBeforeGenerateTime && hasCardsSet && isWithin10MinutesAfterGenerateTime">
         <p v-if="!isBeforeGenerateTime && hasCardsSet && isWithin10MinutesAfterGenerateTime">
             当前卡片内容正在生成，可能会出现无卡片显示或数量不完整的情况，预计生成需耗时5-10分钟<br>请稍后刷新页面查看最终生成结果
         </p>
+    </div>
+    <div class="top-text" v-if="!isLoading && !isLoggedIn">
         <p v-if="!isLoggedIn">当前展示的卡片为示例内容。登录后，即可定制并体验专属于您的智能早报</p>
     </div>
     <div class="main-place" ref="mainPlace">
