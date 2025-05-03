@@ -216,7 +216,7 @@ export default {
             }
             
             const username = this.getCookie('username');
-            const password = this.getCookie('password');
+            const password = this.getCookie('encryptedPassword');
             const avatarUrl = this.getCookie('avatar');
             
             const requestData = {
