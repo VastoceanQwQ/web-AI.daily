@@ -167,7 +167,7 @@
                         <div v-else-if="card.type === 'traffic'">
                             <h2>🚗 出行</h2>
                             <el-form-item label="出行方式">
-                                <el-select v-model="card.transport">
+                                <el-select v-model="card.transport" disabled>
                                     <el-option label="任意" value="任意" />
                                     <el-option label="步行" value="walk" />
                                     <el-option label="驾车" value="drive" />
@@ -206,7 +206,7 @@
                         <div v-else-if="card.type === 'economy'">
                             <h2>📈 财经</h2>
                             <el-form-item label="生成图片">
-                                <el-switch v-model="card.generateImage" disabled />
+                                <el-switch v-model="card.generateImage" />
                             </el-form-item>
                             <el-form-item label="信息类型">
                                 <el-input v-model="card.infoType" placeholder="选填" />
