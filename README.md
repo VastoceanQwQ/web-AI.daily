@@ -8,4 +8,4 @@
 
 agent智能体服务：[coze](https://www.coze.cn/)
 
-演示地址：[https://ai-daily.vastocean.work/](https://ai-daily.vastocean.work/)
+演示地址：[https://ai-daily.vastocean.work/](https://ai-daily.vastocean.work/) (注:智能体服务已暂停，网站功能暂不可用)
